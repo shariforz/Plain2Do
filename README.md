@@ -13,7 +13,7 @@ Multi Tenant schema actively under development.
 
 
 ## Demo
-Visit https://web-production-a256.up.railway.app/ for a live demo. The demo is updated whenever the demo branch code is updated.
+Visit https://shariforz-hrm-system-6231.twc1.net/ for a live demo. The demo is updated whenever the demo branch code is updated.
 ```bash
 username: admin
 password: admin123
@@ -39,7 +39,7 @@ pip install -r requirements.txt #install required packages
 python manage.py migrate # run first migration
 python manage.py runserver # run the server
 ```
-Then locate http://172.0.0.1:8000
+Then locate http://127.0.0.1:8000
 
 ## Admin Login
 When you run migrate, a superuser is created.
