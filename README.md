@@ -1,4 +1,4 @@
-# Django-Human-Resources-Management-System
+# Django-HRM-System
 
 This app is meant to be used by HR manager to manage their hrm records:
 employee data
@@ -23,12 +23,12 @@ password: admin123
 It's best to install Python projects in a Virtual Environment. Once you have set up a VE, clone this project
 
 ```bash
-git clone https://github.com/shariforz/Human-Resources-Management-System.git
+git clone https://github.com/shariforz/HRM-system.git
 ```
 Then
 
 ```bash
-cd Human-Resources-Management-System
+cd HRM-System
 ```
 Run
 
