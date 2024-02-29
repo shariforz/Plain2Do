@@ -622,7 +622,7 @@ class Gen_DT_PaymentBDHistory(models.Model):
 class Gen_DT_ProgressDocs(models.Model):
     """Gen_DT_ProgressDocs"""
 
-    PaymentID_1C = models.CharField( blank=True)
+    PaymentID_1C = models.CharField(max_length=200, blank=True)
 
     PBHistoryID = models.ForeignKey(
         Gen_DT_PaymentBDHistory, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Payment BreakDown History")
@@ -650,7 +650,7 @@ class Gen_DT_ProgressDocs(models.Model):
 class Gen_DT_Payments(models.Model):
     """Gen_DT_Payments"""
 
-    PaymentID_1C = models.CharField( blank=True)
+    PaymentID_1C = models.CharField(max_length=200, blank=True)
 
     ContractID = models.ForeignKey(
         Gen_DT_Contract, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Contract")
@@ -673,7 +673,7 @@ class Gen_DT_Payments(models.Model):
 
     PaymentAmountFixed = models.FloatField( blank=True)
     PaymentCurrencyFixed = models.FloatField( blank=True)
-    Comment = models.CharField( blank=True)
+    Comment = models.CharField(max_length=200, blank=True)
 
 
     class Meta:
