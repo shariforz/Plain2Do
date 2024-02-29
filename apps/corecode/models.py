@@ -618,4 +618,67 @@ class Gen_DT_PaymentBDHistory(models.Model):
 
     def __str__(self):
         return self.PaymentBreakdownDate
+    
+class Gen_DT_ProgressDocs(models.Model):
+    """Gen_DT_ProgressDocs"""
+
+    PaymentID_1C = models.CharField( blank=True)
+
+    PBHistoryID = models.ForeignKey(
+        Gen_DT_PaymentBDHistory, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Payment BreakDown History")
+
+    ProgressPeriodStart = models.DateField( blank=True)
+    ProgressPeriodEnd = models.DateField( blank=True)
+    ProgressDate = models.DateField( blank=True)
+    ProgressAmountVatWo = models.IntegerField( blank=True)
+    AdvanceDeduction = models.IntegerField( blank=True)
+    OtherDeductions = models.IntegerField( blank=True)
+
+    CURRENT_STATUS_CHOICES = [("signed", "Подписано"), ("approved", "Одобрено")]
+
+    current_status = models.CharField(
+        max_length=15, choices=CURRENT_STATUS_CHOICES, default="signed", verbose_name="Статус")
+    
+
+    class Meta:
+        ordering = ["PaymentID_1C"]
+
+    def __str__(self):
+        return self.PaymentID_1C
+
+    
+class Gen_DT_Payments(models.Model):
+    """Gen_DT_Payments"""
+
+    PaymentID_1C = models.CharField( blank=True)
+
+    ContractID = models.ForeignKey(
+        Gen_DT_Contract, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Contract")
+    
+    ProgressID = models.ForeignKey(
+        Gen_DT_ProgressDocs, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Progress Docs")
+
+    PaymentDate = models.DateField( blank=True)
+
+    PAYMENT_TYPE_CHOICES = [("Advance", "Аванс"), ("Progress", "Прогресс"), ("3rd Party", "3ая сторона")]
+
+    PaymentType = models.CharField(
+        max_length=10, choices=PAYMENT_TYPE_CHOICES, default="Advance", verbose_name="Тип оплаты")
+    
+    PaymentBreakdown = models.FloatField( blank=True)
+    PaymentAmountFloating = models.FloatField( blank=True)
+
+    PaymentCurrencyFloating = models.ForeignKey(
+        Gen_DT_Currency, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Progress Docs")
+
+    PaymentAmountFixed = models.FloatField( blank=True)
+    PaymentCurrencyFixed = models.FloatField( blank=True)
+    Comment = models.CharField( blank=True)
+
+
+    class Meta:
+        ordering = ["PaymentID_1C"]
+
+    def __str__(self):
+        return self.PaymentID_1C
 
