@@ -31,7 +31,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # Render Deployment Code
 DEBUG = 'RENDER' not in os.environ
 
-CSRF_TRUSTED_ORIGINS = ["https://shariforz-human-resources-management-system-0cc4.twc1.net", "http://92.255.76.75"]
+CSRF_TRUSTED_ORIGINS = ["https://shariforz-hrm-system-6231.twc1.net", "http://81.200.146.7"]
 
 ALLOWED_HOSTS = ['*']
 
