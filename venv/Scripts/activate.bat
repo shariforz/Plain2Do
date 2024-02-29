@@ -8,7 +8,7 @@ if defined _OLD_CODEPAGE (
     "%SystemRoot%\System32\chcp.com" 65001 > nul
 )
 
-set VIRTUAL_ENV=C:\Users\x240\Downloads\VSCode\Human-Resources-Management-System\Human-Resources-Management-System\venv
+set VIRTUAL_ENV=C:\Users\x240\Downloads\VSCode\HRM-system\venv
 
 if not defined PROMPT set PROMPT=$P$G
 
