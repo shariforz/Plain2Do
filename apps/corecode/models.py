@@ -117,17 +117,17 @@ class Gen_DT_Country(models.Model):
     """Gen_DT_Country"""
 
     CountryCode = models.CharField(max_length=50, unique=True)
-    CountryEN = models.CharField(max_length=100)
-    CountryRU = models.CharField(max_length=100)
-    CountryTR = models.CharField(max_length=100)
-    AlphaCode2 = models.CharField(max_length=10, verbose_name="AlphaCode(2)")
-    AlphaCode3 = models.CharField(max_length=10, verbose_name="AlphaCode(3)")
-    CountriesForRF = models.BooleanField(default=False)
-    LocalEEC = models.BooleanField(default=False, verbose_name="Local/ EEC")
-    RvpVnj = models.BooleanField(default=False, verbose_name="RVP/ VNJ")
-    Visa = models.BooleanField(default=False)
-    VKS = models.BooleanField(default=False)
-    Patent = models.BooleanField(default=False)
+    CountryEN = models.CharField(max_length=100, blank=True)
+    CountryRU = models.CharField(max_length=100, blank=True)
+    CountryTR = models.CharField(max_length=100, blank=True)
+    AlphaCode2 = models.CharField(max_length=10, verbose_name="AlphaCode(2)", blank=True)
+    AlphaCode3 = models.CharField(max_length=10, verbose_name="AlphaCode(3)", blank=True)
+    CountriesForRF = models.BooleanField(default=False, blank=True)
+    LocalEEC = models.BooleanField(default=False, verbose_name="Local/ EEC", blank=True)
+    RvpVnj = models.BooleanField(default=False, verbose_name="RVP/ VNJ", blank=True)
+    Visa = models.BooleanField(default=False, blank=True)
+    VKS = models.BooleanField(default=False, blank=True)
+    Patent = models.BooleanField(default=False, blank=True)
 
     class Meta:
         #verbose_name =CountryEN "Наименование"
@@ -156,8 +156,8 @@ class Gen_DT_EmpLevel(models.Model):
     EmpLevelEN = models.CharField(max_length=200)
     EmpLevelRU = models.CharField(max_length=200)
     EmpLevelTR = models.CharField(max_length=200)
-    OfficeEmp = models.BooleanField(default=False)
-    ProjectEmp = models.BooleanField(default=True)
+    OfficeEmp = models.BooleanField(default=False, blank=True)
+    ProjectEmp = models.BooleanField(default=True, blank=True)
 
     class Meta:
         ordering = ["EmpLevelEN"]
@@ -204,14 +204,14 @@ class Gen_DT_Currency(models.Model):
     """Gen_DT_Currency"""
 
     CurrencyNumber = models.IntegerField(unique=True)
-    CurrencyID_1C = models.CharField(max_length=100)
-    CurrencyCode = models.CharField(max_length=100)
-    CountryAlphaCode2 = models.CharField(max_length=10, verbose_name="AlphaCode(2)")
-    CountryAlphaCode3 = models.CharField(max_length=10, verbose_name="AlphaCode(3)")
-    CurrencyEN = models.CharField(max_length=200)
-    CurrencyRU = models.CharField(max_length=200)
-    CurrencyTR = models.CharField(max_length=200)
-    ActiveCurr = models.BooleanField(default=False)
+    CurrencyID_1C = models.CharField(max_length=100, blank=True)
+    CurrencyCode = models.CharField(max_length=100, blank=True)
+    CountryAlphaCode2 = models.CharField(max_length=10, blank=True, verbose_name="AlphaCode(2)")
+    CountryAlphaCode3 = models.CharField(max_length=10, blank=True, verbose_name="AlphaCode(3)")
+    CurrencyEN = models.CharField(max_length=200, blank=True)
+    CurrencyRU = models.CharField(max_length=200, blank=True)
+    CurrencyTR = models.CharField(max_length=200, blank=True)
+    ActiveCurr = models.BooleanField(default=False, blank=True)
 
     class Meta:
         ordering = ["CurrencyNumber"]
@@ -235,15 +235,15 @@ class Gen_DT_CBR_Rates(models.Model):
 class Gen_DT_CounterParty(models.Model):
     """Gen_DT_CounterParty"""
 
-    CounterPartyID_1C = models.CharField(max_length=100)
+    CounterPartyID_1C = models.CharField(max_length=100, blank=True)
     CounterPartyEN = models.CharField(max_length=200)
     CounterPartyRU = models.CharField(max_length=200)
     CounterPartyTR = models.CharField(max_length=200)
     CounterPartyINN = models.CharField(max_length=200)
-    CounterPartyKPP = models.CharField(max_length=200)
-    Client = models.BooleanField(default=False)
-    ClientGroup = models.CharField(max_length=100)
-    Supplier = models.BooleanField(default=False)
+    CounterPartyKPP = models.CharField(max_length=200, blank=True)
+    Client = models.BooleanField(default=False, blank=True)
+    ClientGroup = models.CharField(max_length=100, blank=True)
+    Supplier = models.BooleanField(default=False, blank=True)
 
     class Meta:
         ordering = ["CounterPartyEN"]
@@ -257,11 +257,11 @@ class Gen_DT_SubjectOfRF(models.Model):
     SubjectOfRF_EN = models.CharField(max_length=200)
     SubjectOfRF_RU = models.CharField(max_length=200)
     SubjectOfRF_TR = models.CharField(max_length=200)
-    SubjRF_Abbreviation = models.CharField(max_length=200)
-    FederalDistrictEN = models.CharField(max_length=200)
-    FederalDistrictRU = models.CharField(max_length=200)
-    FederalDistrictTR = models.CharField(max_length=200)
-    OKATO_CODE = models.CharField(max_length=200)
+    SubjRF_Abbreviation = models.CharField(max_length=200, blank=True)
+    FederalDistrictEN = models.CharField(max_length=200, blank=True)
+    FederalDistrictRU = models.CharField(max_length=200, blank=True)
+    FederalDistrictTR = models.CharField(max_length=200, blank=True)
+    OKATO_CODE = models.CharField(max_length=200, blank=True)
     
     class Meta:
         ordering = ["SubjectOfRF_EN"]
@@ -272,8 +272,8 @@ class Gen_DT_SubjectOfRF(models.Model):
 class Gen_DT_Project(models.Model):
     """Gen_DT_Project"""
 
-    ProjectID_1C = models.CharField(max_length=100)
-    ProjectCode = models.CharField(max_length=200)
+    ProjectID_1C = models.CharField(max_length=100, blank=True)
+    ProjectCode = models.CharField(max_length=200, blank=True)
     ProjectNameEN = models.CharField(max_length=200)
     ProjectNameRU = models.CharField(max_length=200)
     ProjectNameTR = models.CharField(max_length=200)
@@ -282,11 +282,11 @@ class Gen_DT_Project(models.Model):
         Gen_DT_SubjectOfRF, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Subject of RF"
     )
 
-    AddressEN = models.CharField(max_length=200)
-    AddressRU = models.CharField(max_length=200)
-    AddressTR = models.CharField(max_length=200)
-    StartDate = models.DateField()
-    EndDate = models.DateField()
+    AddressEN = models.CharField(max_length=200, blank=True)
+    AddressRU = models.CharField(max_length=200, blank=True)
+    AddressTR = models.CharField(max_length=200, blank=True)
+    StartDate = models.DateField( blank=True)
+    EndDate = models.DateField( blank=True)
     
     class Meta:
         ordering = ["ProjectNameEN"]
@@ -337,14 +337,14 @@ class Gen_DT_VAT_Rate(models.Model):
 class Gen_DT_UoM(models.Model):
     """Gen_DT_UoM"""
 
-    UoM_Code_1C = models.CharField(max_length=200)
+    UoM_Code_1C = models.CharField(max_length=20, blank=True)
     UoM_Short_EN = models.CharField(max_length=200)
     UoM_Short_RU = models.CharField(max_length=200)
     UoM_Short_TR = models.CharField(max_length=200)
-    UoM_EN = models.CharField(max_length=200)
-    UoM_RU = models.CharField(max_length=200)
-    UoM_TR = models.CharField(max_length=200)
-    UoM_Active = models.BooleanField(default=True)
+    UoM_EN = models.CharField(max_length=200, blank=True)
+    UoM_RU = models.CharField(max_length=200, blank=True)
+    UoM_TR = models.CharField(max_length=200, blank=True)
+    UoM_Active = models.BooleanField(default=True, blank=True)
     
     class Meta:
         ordering = ["UoM_Short_EN"]
@@ -359,8 +359,8 @@ class Gen_DT_BudgetData(models.Model):
     Discipline = models.ForeignKey(
         Gen_DT_Discipline, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Discipline")
 
-    BudgetCode = models.CharField(max_length=100)
-    PrimaveraCode = models.CharField(max_length=100)
+    BudgetCode = models.CharField(max_length=100, blank=True)
+    PrimaveraCode = models.CharField(max_length=100, blank=True)
 
     JotTitle = models.ForeignKey(
         Gen_DT_JobTitle, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Job Title")
@@ -374,11 +374,11 @@ class Gen_DT_BudgetData(models.Model):
     UoM = models.ForeignKey(
         Gen_DT_UoM, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="UoM")
 
-    StartOfWorkDate = models.DateField()
-    EndOfWorkDate = models.DateField()
+    StartOfWorkDate = models.DateField( blank=True)
+    EndOfWorkDate = models.DateField( blank=True)
 
-    EmpQty = models.IntegerField()
-    EmpNetSalary = models.FloatField()
+    EmpQty = models.IntegerField( blank=True)
+    EmpNetSalary = models.FloatField( blank=True)
 
     class Meta:
         #verbose_name =CountryEN "Наименование"
@@ -453,11 +453,11 @@ class Gen_DT_LegalExpences(models.Model):
     ExpenseType = models.ForeignKey(
         Gen_DT_ExpenseType, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Expense Type")
     
-    ExpensePrice = models.FloatField()
+    ExpensePrice = models.FloatField( blank=True)
 
-    LegalExpenseActive = models.BooleanField(default=True)
+    LegalExpenseActive = models.BooleanField(default=True, blank=True)
 
-    EffectiveDate = models.DateField()
+    EffectiveDate = models.DateField( blank=True)
 
     class Meta:
         ordering = ["ProjectID"]
@@ -494,7 +494,7 @@ class Gen_DT_EmpTaxType(models.Model):
 class Gen_DT_EmpTaxPayer(models.Model):
     """Gen_DT_EmpTaxPayer"""
 
-    EmpTaxCategoryCode = models.CharField(max_length=200)
+    EmpTaxCategoryCode = models.CharField(max_length=200, blank=True)
 
     EmpTaxCategoryEN = models.CharField(max_length=200)
     EmpTaxCategoryRU = models.CharField(max_length=200)
@@ -504,8 +504,8 @@ class Gen_DT_EmpTaxPayer(models.Model):
         Gen_DT_EmpTaxType, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Employee Tax Type")
 
     UniformBaseValueLimitUCVB = models.FloatField(verbose_name="UniformBaseValueLimit(UCVB)")
-    WithinLimit = models.FloatField()
-    AboveLimit = models.FloatField()
+    WithinLimit = models.FloatField( blank=True)
+    AboveLimit = models.FloatField( blank=True)
 
     class Meta:
         ordering = ["EmpTaxCategoryEN"]
@@ -516,13 +516,13 @@ class Gen_DT_EmpTaxPayer(models.Model):
 class Gen_DT_OurCompany(models.Model):
     """Gen_DT_OurCompany"""
 
-    OurCompanyID_1C = models.CharField(max_length=100)
+    OurCompanyID_1C = models.CharField(max_length=100, blank=True)
     OurCompanyEN = models.CharField(max_length=200)
     OurCompanyRU = models.CharField(max_length=200)
     OurCompanyTR = models.CharField(max_length=200)
-    OurCompanyINN = models.CharField(max_length=200)
-    OurCompanyKPP = models.CharField(max_length=200)
-    ShortCode = models.CharField(max_length=100)
+    OurCompanyINN = models.CharField(max_length=200, blank=True)
+    OurCompanyKPP = models.CharField(max_length=200, blank=True)
+    ShortCode = models.CharField(max_length=100, blank=True)
 
     TaxPayer = models.ForeignKey(
         Gen_DT_EmpTaxPayer, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Tax Payer")
@@ -537,10 +537,10 @@ class Gen_DT_OurCompany(models.Model):
 class Gen_DT_Contract(models.Model):
     """Gen_DT_Contract"""
 
-    ContractID_1C = models.CharField(max_length=100)
+    ContractID_1C = models.CharField(max_length=100, blank=True)
     ContractsNo = models.CharField(max_length=200)
-    ContractDate = models.DateField()
-    ContractsSubject = models.CharField(max_length=200)
+    ContractDate = models.DateField( blank=True)
+    ContractsSubject = models.CharField(max_length=200, blank=True)
 
     OurCompany = models.ForeignKey(
         Gen_DT_OurCompany, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Our Company")
@@ -560,13 +560,13 @@ class Gen_DT_Contract(models.Model):
     Currency = models.ForeignKey(
         Gen_DT_Currency, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Currency")
 
-    ContractAmountVatWo = models.FloatField()
+    ContractAmountVatWo = models.FloatField( blank=True)
 
     VAT_Rate = models.ForeignKey(
         Gen_DT_VAT_Rate, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="VAT Rate")
 
-    ContractStartDate = models.DateField()
-    ContractEndDate = models.DateField()
+    ContractStartDate = models.DateField( blank=True)
+    ContractEndDate = models.DateField( blank=True)
     
     class Meta:
         ordering = ["ContractsSubject"]
@@ -584,13 +584,38 @@ class Gen_DT_EmpTaxCalc(models.Model):
     LegDocumentType = models.ForeignKey(
         Gen_DT_DocumentType, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Document Type")
 
-    TaxCodeSSF = models.IntegerField()
-    TaxCodePIT_Until182day = models.IntegerField()
-    TaxCodePIT_After182day = models.IntegerField()
+    TaxCodeSSF = models.IntegerField( blank=True)
+    TaxCodePIT_Until182day = models.IntegerField( blank=True)
+    TaxCodePIT_After182day = models.IntegerField( blank=True)
 
     class Meta:
         ordering = ["EmpTaxRateEN"]
 
     def __str__(self):
         return self.EmpTaxRateEN
+    
+class Gen_DT_PaymentBDHistory(models.Model):
+    """Gen_DT_PaymentBDHistory"""
+
+    FloatingRate = models.IntegerField( blank=True)
+    FixedRate = models.IntegerField( blank=True)
+    FixedRateCurrency = models.FloatField( blank=True)
+    PaymentBreakdownDate = models.DateField( blank=True)
+
+    @property
+    def FloatingRatePerc(self):
+        return f"{self.FloatingRate} %"
+    
+    @property
+    def FixedRatePerc(self):
+        return f"{self.FixedRate} %"
+
+    ContractID = models.ForeignKey(
+        Gen_DT_Contract, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Contract")
+
+    class Meta:
+        ordering = ["PaymentBreakdownDate"]
+
+    def __str__(self):
+        return self.PaymentBreakdownDate
 
