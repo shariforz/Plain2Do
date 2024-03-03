@@ -2,11 +2,7 @@ from django import forms
 from django.forms import ModelForm, modelformset_factory
 
 from .models import (
-    AcademicSession,
-    AcademicTerm,
     SiteConfig,
-    StudentClass,
-    Subject,
     PermitDocCategory,
     Citizenship,
     DocumentType,
@@ -22,36 +18,36 @@ SiteConfigForm = modelformset_factory(
 )
 
 
-class AcademicSessionForm(ModelForm):
-    prefix = "Academic Session"
+# class AcademicSessionForm(ModelForm):
+#     prefix = "Academic Session"
 
-    class Meta:
-        model = AcademicSession
-        fields = ["name", "current"]
-
-
-class AcademicTermForm(ModelForm):
-    prefix = "Academic Term"
-
-    class Meta:
-        model = AcademicTerm
-        fields = ["name", "current"]
+#     class Meta:
+#         model = AcademicSession
+#         fields = ["name", "current"]
 
 
-class SubjectForm(ModelForm):
-    prefix = "Subject"
+# class AcademicTermForm(ModelForm):
+#     prefix = "Academic Term"
 
-    class Meta:
-        model = Subject
-        fields = ["name"]
+#     class Meta:
+#         model = AcademicTerm
+#         fields = ["name", "current"]
 
 
-class StudentClassForm(ModelForm):
-    prefix = "Class"
+# class SubjectForm(ModelForm):
+#     prefix = "Subject"
 
-    class Meta:
-        model = StudentClass
-        fields = ["name"]
+#     class Meta:
+#         model = Subject
+#         fields = ["name"]
+
+
+# class StudentClassForm(ModelForm):
+#     prefix = "Class"
+
+#     class Meta:
+#         model = StudentClass
+#         fields = ["name"]
 
 class PermitDocCategoryForm(ModelForm):
     prefix = "PermitDocCategory"
@@ -74,7 +70,7 @@ class DocumentTypeForm(ModelForm):
         model = DocumentType
         fields = ["name"]
 
-class CurrentSessionForm(forms.Form):
+""" class CurrentSessionForm(forms.Form):
     current_session = forms.ModelChoiceField(
         queryset=AcademicSession.objects.all(),
         help_text='Click <a href="/session/create/?next=current-session/">here</a> to add new session',
@@ -83,3 +79,4 @@ class CurrentSessionForm(forms.Form):
         queryset=AcademicTerm.objects.all(),
         help_text='Click <a href="/term/create/?next=current-session/">here</a> to add new term',
     )
+ """

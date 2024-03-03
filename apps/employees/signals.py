@@ -5,7 +5,6 @@ from io import StringIO
 from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
 
-from apps.corecode.models import StudentClass
 
 from .models import Employee, EmployeeBulkUpload
 
@@ -42,10 +41,7 @@ def create_bulk_employee(sender, created, instance, *args, **kwargs):
                     if "current_class" in row and row["current_class"]
                     else ""
                 )
-                if current_class:
-                    theclass, kind = StudentClass.objects.get_or_create(
-                        name=current_class
-                    )
+            
 
                 check = Employee.objects.filter(registration_number=reg).exists()
                 if not check:

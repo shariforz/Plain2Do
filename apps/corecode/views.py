@@ -8,22 +8,13 @@ from django.views.generic import ListView, TemplateView, View
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
 from .forms import (
-    AcademicSessionForm,
-    AcademicTermForm,
-    CurrentSessionForm,
     SiteConfigForm,
-    StudentClassForm,
-    SubjectForm,
     PermitDocCategoryForm,
     CitizenshipForm,
     DocumentTypeForm,
 )
 from .models import (
-    AcademicSession,
-    AcademicTerm,
     SiteConfig,
-    StudentClass,
-    Subject,
     PermitDocCategory,
     Citizenship,
     DocumentType,
@@ -54,7 +45,7 @@ class SiteConfigView(LoginRequiredMixin, View):
         return render(request, self.template_name, context)
 
 
-class SessionListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
+""" class SessionListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
     model = AcademicSession
     template_name = "corecode/session_list.html"
 
@@ -205,7 +196,7 @@ class ClassDeleteView(LoginRequiredMixin, DeleteView):
         messages.success(self.request, self.success_message.format(obj.name))
         return super(ClassDeleteView, self).delete(request, *args, **kwargs)
 
-
+ """
 class PermitDocCategoryListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
     model = PermitDocCategory
     template_name = "corecode/permit_doc_cat_list.html"
@@ -322,33 +313,33 @@ class DocumentTypeDeleteView(LoginRequiredMixin, DeleteView):
         return super(DocumentTypeDeleteView, self).delete(request, *args, **kwargs)
 
 
-class SubjectListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
+""" class SubjectListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
     model = Subject
     template_name = "corecode/subject_list.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["form"] = SubjectForm()
-        return context
+        return context """
 
 
-class SubjectCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
+""" class SubjectCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Subject
     form_class = SubjectForm
     template_name = "corecode/mgt_form.html"
     success_url = reverse_lazy("subjects")
     success_message = "New subject successfully added"
+ """
 
-
-class SubjectUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
+""" class SubjectUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Subject
     fields = ["name"]
     success_url = reverse_lazy("subjects")
     success_message = "Subject successfully updated."
     template_name = "corecode/mgt_form.html"
+ """
 
-
-class SubjectDeleteView(LoginRequiredMixin, DeleteView):
+""" class SubjectDeleteView(LoginRequiredMixin, DeleteView):
     model = Subject
     success_url = reverse_lazy("subjects")
     template_name = "corecode/core_confirm_delete.html"
@@ -359,29 +350,29 @@ class SubjectDeleteView(LoginRequiredMixin, DeleteView):
         messages.success(self.request, self.success_message.format(obj.name))
         return super(SubjectDeleteView, self).delete(request, *args, **kwargs)
 
+ """
+# class CurrentSessionAndTermView(LoginRequiredMixin, View):
+#     """Current SEssion and Term"""
 
-class CurrentSessionAndTermView(LoginRequiredMixin, View):
-    """Current SEssion and Term"""
+#     form_class = CurrentSessionForm
+#     template_name = "corecode/current_session.html"
 
-    form_class = CurrentSessionForm
-    template_name = "corecode/current_session.html"
+#     def get(self, request, *args, **kwargs):
+#         form = self.form_class(
+#             initial={
+#                 "current_session": AcademicSession.objects.get(current=True),
+#                 "current_term": AcademicTerm.objects.get(current=True),
+#             }
+#         )
+#         return render(request, self.template_name, {"form": form})
 
-    def get(self, request, *args, **kwargs):
-        form = self.form_class(
-            initial={
-                "current_session": AcademicSession.objects.get(current=True),
-                "current_term": AcademicTerm.objects.get(current=True),
-            }
-        )
-        return render(request, self.template_name, {"form": form})
+#     def post(self, request, *args, **kwargs):
+#         form = self.form_Class(request.POST)
+#         if form.is_valid():
+#             session = form.cleaned_data["current_session"]
+#             term = form.cleaned_data["current_term"]
+#             AcademicSession.objects.filter(name=session).update(current=True)
+#             AcademicSession.objects.exclude(name=session).update(current=False)
+#             AcademicTerm.objects.filter(name=term).update(current=True)
 
-    def post(self, request, *args, **kwargs):
-        form = self.form_Class(request.POST)
-        if form.is_valid():
-            session = form.cleaned_data["current_session"]
-            term = form.cleaned_data["current_term"]
-            AcademicSession.objects.filter(name=session).update(current=True)
-            AcademicSession.objects.exclude(name=session).update(current=False)
-            AcademicTerm.objects.filter(name=term).update(current=True)
-
-        return render(request, self.template_name, {"form": form})
+#         return render(request, self.template_name, {"form": form})
