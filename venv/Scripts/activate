@@ -37,7 +37,7 @@ deactivate () {
 # unset irrelevant variables
 deactivate nondestructive
 
-VIRTUAL_ENV="C:\Users\x240\Downloads\VSCode\HRM-system\venv"
+VIRTUAL_ENV="C:\Users\x240\Downloads\VSCode\Plain2Do\Plain2Do\venv"
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"
