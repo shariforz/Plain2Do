@@ -12,7 +12,7 @@ Multi Tenant schema actively under development.
 
 
 ## Demo
-Visit https://shariforz-hrm-system-0640.twc1.net/  for a live demo. The demo is updated whenever the demo branch code is updated.
+Visit  https://shariforz-plain2do-970b.twc1.net/ for a live demo. The demo is updated whenever the demo branch code is updated.
 ```bash
 username: admin
 password: admin123
