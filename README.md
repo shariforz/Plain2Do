@@ -1,9 +1,8 @@
-# Django-HRM-System
+# Plain2Do-System
 
 This app is meant to be used by HR manager to manage their hrm records:
 employee data
-staff
-results and
+and
 finances.
 
 It currently doesn't allow employees/staff to login.
@@ -23,12 +22,12 @@ password: admin123
 It's best to install Python projects in a Virtual Environment. Once you have set up a VE, clone this project
 
 ```bash
-git clone https://github.com/shariforz/HRM-system.git
+git clone https://github.com/shariforz/Plain2Do.git
 ```
 Then
 
 ```bash
-cd HRM-System
+cd Plain2Do
 ```
 Run
 
