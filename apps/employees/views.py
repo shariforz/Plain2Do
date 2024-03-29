@@ -10,7 +10,7 @@ from django.views.generic import DetailView, ListView, View
 from django.shortcuts import HttpResponseRedirect, redirect, render
 from django.views.generic.edit import CreateView, DeleteView, UpdateView
 
-#from apps.finance.models import Invoice
+# from apps.finance.models import Invoice
 
 from .models import Employee, EmployeeBulkUpload
 
@@ -19,11 +19,10 @@ from .forms import (
 )
 
 
-
 class EmployeeListView(LoginRequiredMixin, SuccessMessageMixin, ListView):
     model = Employee
     # context_object_name = 'employee_list'   # your own name for the list as a template variable
-    template_name = "employees/employee_list.html" # own template name/location
+    template_name = "employees/employee_list.html"  # own template name/location
 
     """ def get_context_data(request):
         context = super().get_context_data(**kwargs)
@@ -45,13 +44,14 @@ class EmployeeDetailView(LoginRequiredMixin, DetailView):
 
     def get_context_data(self, **kwargs):
         context = super(EmployeeDetailView, self).get_context_data(**kwargs)
-    #    context["payments"] = Invoice.objects.filter(employee=self.object)
+        #    context["payments"] = Invoice.objects.filter(employee=self.object)
         return context
 
 
 class EmployeeCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Employee
     fields = "__all__"
+    template_name = "employees/employee_form.html"
     success_message = "Новый сотрудник успешно добавлен."
 
     def get_form(self):

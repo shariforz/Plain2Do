@@ -60,9 +60,13 @@
               <i class="fas fa-user mr-2"></i> Профил
             </a>
             <div class="dropdown-divider"></div>
-            <a href="{% url 'logout' %}" class="dropdown-item">
-              <i class="fas fa-sign-out"></i> Выйти
-            </a>
+{#            <a href="{% url 'logout' %}" class="dropdown-item">#}
+{#              <i class="fas fa-sign-out"></i> Выйти#}
+{#            </a>#}
+              <form action="{% url 'logout' %}" class="dropdown-item" method="post">
+                  {% csrf_token %}
+                <button type="submit" class="fas fa-sign-out"></button> Выйти
+              </form>
           </div>
         </li>
         <!-- <li class="nav-item">
