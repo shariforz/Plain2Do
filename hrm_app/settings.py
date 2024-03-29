@@ -13,9 +13,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 from django.utils.translation import gettext_lazy as _
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
-load_dotenv()
+# load_dotenv()
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -25,12 +25,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
-
+# SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = 'qwewqe'
 # SECURITY WARNING: don't run with debug turned on in production!
 # Render Deployment Code
 DEBUG = 'RENDER' not in os.environ
-
 CSRF_TRUSTED_ORIGINS = ["https://shariforz-hrm-system-6231.twc1.net", "http://81.200.146.7"]
 
 ALLOWED_HOSTS = ['*']
@@ -56,6 +55,8 @@ INSTALLED_APPS = [
  #   "apps.result",
     "apps.employees",
     "apps.docs",
+    'drf_spectacular',
+    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -250,3 +251,14 @@ import os
 STATIC_URL = 'static/'
 STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
+
+REST_FRAMEWORK = {
+    # YOUR SETTINGS
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'Plain2do API',
+    'DESCRIPTION': 'API is intended for the start-up project Plain2do',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+}
