@@ -1601,6 +1601,7 @@ class EmployeeBulkUploadAPIView(APIView):
 
     @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_201_CREATED: EmployeeBulkUploadSerializer()}, tags=['EmployeeBulkUpload'])
     def post(self, request, *args, **kwargs):
+        print("YES")
         serializer = EmployeeBulkUploadSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
