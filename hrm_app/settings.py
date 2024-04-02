@@ -30,7 +30,7 @@ SECRET_KEY = 'qwewqe'
 # SECURITY WARNING: don't run with debug turned on in production!
 # Render Deployment Code
 DEBUG = 'RENDER' not in os.environ
-CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net/", "http://91.210.170.174"]
+CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net", "http://91.210.170.174"]
 
 ALLOWED_HOSTS = ['*']
 
