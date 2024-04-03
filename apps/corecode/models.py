@@ -632,3 +632,53 @@ class Gen_DT_Payments(models.Model):
     def __str__(self):
         return self.PaymentID_1C
 
+
+class PatentPricesDetails(models.Model):
+    """PatentPricesDetail"""
+    SubjectofRF_ID = models.ForeignKey(Gen_DT_SubjectOfRF, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Gen_DT_SubjectOfRF")
+    RegionalCoefficient_Base = models.CharField(max_length=256)
+    Amount = models.FloatField(blank=True)
+    MonthlyPatentPayment = models.FloatField(null=True)
+    Active = models.BooleanField()
+    Effective_Date = models.DateField(blank=True)
+
+    class Meta:
+        ordering = ['SubjectofRF_ID']
+
+    def __str__(self):
+        return self.RegionalCoefficient_Base
+
+
+class UnitOfMeasure(models.Model):
+    """UnitOfMeasure"""
+    UoM_Code_1C = models.IntegerField()
+    UoM_Short_EN = models.CharField(max_length=20, null=True, blank=True)
+    UoM_Short_RU = models.CharField(max_length=20, null=True, blank=True)
+    UoM_Short_TR = models.CharField(max_length=20, null=True, blank=True)
+    UoM_EN = models.CharField(max_length=56)
+    UoM_RU = models.CharField(max_length=56)
+    UoM_TR = models.CharField(max_length=56)
+    Active = models.BooleanField()
+
+    class Meta:
+        ordering = ['UoM_Code_1C']
+
+    def __str__(self):
+        return self.UoM_Code_1C
+
+
+class Client(models.Model):
+    """Client"""
+    ClientID = models.IntegerField()
+    ClientShortNameRU = models.CharField(max_length=56)
+    ClientShortNameEN = models.CharField(max_length=56)
+    ClientINN = models.BigIntegerField()
+    ClientKPP = models.IntegerField()
+
+    class Meta:
+        ordering = ['ClientID']
+
+    def __str__(self):
+        return self.ClientShortNameRU
+
+

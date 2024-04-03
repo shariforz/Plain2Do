@@ -1601,7 +1601,6 @@ class EmployeeBulkUploadAPIView(APIView):
 
     @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_201_CREATED: EmployeeBulkUploadSerializer()}, tags=['EmployeeBulkUpload'])
     def post(self, request, *args, **kwargs):
-        print("YES")
         serializer = EmployeeBulkUploadSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -1623,4 +1622,118 @@ class EmployeeBulkUploadAPIView(APIView):
         obj = get_object_or_404(EmployeeBulkUpload, pk=pk)
         obj.delete()
         serializer = EmployeeBulkUploadSerializer(obj)
+        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+
+
+class PatentPricesDetailsAPIView(APIView):
+    renderer_classes = [JSONRenderer]
+
+    @extend_schema(request=PatentPricesDetailsSerializer, responses={HTTP_200_OK: PatentPricesDetailsSerializer()}, tags=['PatentPricesDetails'])
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            instance = get_object_or_404(PatentPricesDetails, pk=pk)
+            serializer = PatentPricesDetailsSerializer(instance=instance)
+            return Response({"Response": serializer.data}, status=HTTP_200_OK)
+        serializer = PatentPricesDetailsSerializer(PatentPricesDetails.objects.all(), many=True)
+        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+
+    @extend_schema(request=PatentPricesDetailsSerializer, responses={HTTP_201_CREATED: PatentPricesDetailsSerializer()}, tags=['PatentPricesDetails'])
+    def post(self, request, *args, **kwargs):
+        serializer = PatentPricesDetailsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
+                            content_type='multipart/form-data')
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+    @extend_schema(request=PatentPricesDetailsSerializer, responses={HTTP_200_OK: PatentPricesDetailsSerializer()}, tags=['PatentPricesDetails'])
+    def put(self, request, pk, *args, **kwargs):
+        instance = get_object_or_404(PatentPricesDetails, pk=pk)
+        serializer = PatentPricesDetailsSerializer(instance=instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK,
+                            content_type='multipart/form-data')
+
+    @extend_schema(request=PatentPricesDetailsSerializer, responses={HTTP_200_OK: PatentPricesDetailsSerializer()}, tags=['PatentPricesDetails'])
+    def delete(self, request, pk):
+        obj = get_object_or_404(PatentPricesDetails, pk=pk)
+        obj.delete()
+        serializer = PatentPricesDetailsSerializer(obj)
+        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+
+
+class UnitOfMeasureAPIView(APIView):
+    renderer_classes = [JSONRenderer]
+
+    @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            instance = get_object_or_404(UnitOfMeasure, pk=pk)
+            serializer = UnitOfMeasureSerializer(instance=instance)
+            return Response({"Response": serializer.data}, status=HTTP_200_OK)
+        serializer = UnitOfMeasureSerializer(UnitOfMeasure.objects.all(), many=True)
+        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+
+    @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_201_CREATED: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
+    def post(self, request, *args, **kwargs):
+        serializer = UnitOfMeasureSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
+                            content_type='multipart/form-data')
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+    @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
+    def put(self, request, pk, *args, **kwargs):
+        instance = get_object_or_404(UnitOfMeasure, pk=pk)
+        serializer = UnitOfMeasureSerializer(instance=instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK,
+                            content_type='multipart/form-data')
+
+    @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
+    def delete(self, request, pk):
+        obj = get_object_or_404(UnitOfMeasure, pk=pk)
+        obj.delete()
+        serializer = UnitOfMeasureSerializer(obj)
+        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+
+
+class ClientAPIView(APIView):
+    renderer_classes = [JSONRenderer]
+
+    @extend_schema(request=ClientSerializer, responses={HTTP_200_OK: ClientSerializer()}, tags=['Client'])
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            instance = get_object_or_404(Client, pk=pk)
+            serializer = ClientSerializer(instance=instance)
+            return Response({"Response": serializer.data}, status=HTTP_200_OK)
+        serializer = ClientSerializer(Client.objects.all(), many=True)
+        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+
+    @extend_schema(request=ClientSerializer, responses={HTTP_201_CREATED: ClientSerializer()}, tags=['Client'])
+    def post(self, request, *args, **kwargs):
+        serializer = ClientSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
+                            content_type='multipart/form-data')
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+    @extend_schema(request=ClientSerializer, responses={HTTP_200_OK: ClientSerializer()}, tags=['Client'])
+    def put(self, request, pk, *args, **kwargs):
+        instance = get_object_or_404(Client, pk=pk)
+        serializer = ClientSerializer(instance=instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK,
+                            content_type='multipart/form-data')
+
+    @extend_schema(request=ClientSerializer, responses={HTTP_200_OK: ClientSerializer()}, tags=['Client'])
+    def delete(self, request, pk):
+        obj = get_object_or_404(Client, pk=pk)
+        obj.delete()
+        serializer = ClientSerializer(obj)
         return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')

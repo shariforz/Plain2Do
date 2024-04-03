@@ -13,12 +13,12 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 from django.utils.translation import gettext_lazy as _
 
-<<<<<<< HEAD
-=======
+# <<<<<<< HEAD
+# =======
 # from dotenv import load_dotenv
 import os
 # load_dotenv()
->>>>>>> 32089d6c89ba3029473b0d54a59e4f6a2908f098
+# >>>>>>> 32089d6c89ba3029473b0d54a59e4f6a2908f098
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -29,24 +29,24 @@ import os
 
 load_dotenv()
 
-DEBUG=True
+# DEBUG=True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ.get('SECRET_KEY')
-SECRET_KEY = 'qwewqe'
+SECRET_KEY = os.environ.get('SECRET_KEY')
+# SECRET_KEY = 'qwewqe'
 # SECURITY WARNING: don't run with debug turned on in production!
 # Render Deployment Code
 DEBUG = 'RENDER' not in os.environ
-<<<<<<< HEAD
+# <<<<<<< HEAD
 
-=======
->>>>>>> 32089d6c89ba3029473b0d54a59e4f6a2908f098
+# =======
+# >>>>>>> 32089d6c89ba3029473b0d54a59e4f6a2908f098
 CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net", "http://91.210.170.174"]
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['https://shariforz-plain2do-970b.twc1.net']
 
 
 # Application definition

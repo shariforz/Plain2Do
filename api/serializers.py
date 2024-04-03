@@ -202,6 +202,24 @@ class Gen_DT_PaymentsSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class PatentPricesDetailsSerializer(ModelSerializer):
+    class Meta:
+        model = PatentPricesDetails
+        fields = '__all__'
+
+
+class UnitOfMeasureSerializer(ModelSerializer):
+    class Meta:
+        model = UnitOfMeasure
+        fields = '__all__'
+
+
+class ClientSerializer(ModelSerializer):
+    class Meta:
+        model = Client
+        fields = '__all__'
+
+
 # serializers for docs models starts from here
 class DocSerializer(ModelSerializer):
     class Meta:
