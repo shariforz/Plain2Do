@@ -649,24 +649,6 @@ class PatentPricesDetails(models.Model):
         return self.RegionalCoefficient_Base
 
 
-class UnitOfMeasure(models.Model):
-    """UnitOfMeasure"""
-    UoM_Code_1C = models.IntegerField()
-    UoM_Short_EN = models.CharField(max_length=20, null=True, blank=True)
-    UoM_Short_RU = models.CharField(max_length=20, null=True, blank=True)
-    UoM_Short_TR = models.CharField(max_length=20, null=True, blank=True)
-    UoM_EN = models.CharField(max_length=56)
-    UoM_RU = models.CharField(max_length=56)
-    UoM_TR = models.CharField(max_length=56)
-    Active = models.BooleanField()
-
-    class Meta:
-        ordering = ['UoM_Code_1C']
-
-    def __str__(self):
-        return self.UoM_Code_1C
-
-
 class Client(models.Model):
     """Client"""
     ClientID = models.IntegerField()
