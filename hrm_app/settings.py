@@ -44,7 +44,7 @@ DEBUG = 'RENDER' not in os.environ
 
 # =======
 # >>>>>>> 32089d6c89ba3029473b0d54a59e4f6a2908f098
-CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net", "http://shariforz-plain2do-970b.twc1.net", "shariforz-plain2do-970b.twc1.net", "http://91.210.170.174"]
+CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net", "http://shariforz-plain2do-970b.twc1.net", "http://91.210.170.174"]
 
 ALLOWED_HOSTS = ['https://shariforz-plain2do-970b.twc1.net', "http://shariforz-plain2do-970b.twc1.net", "shariforz-plain2do-970b.twc1.net"]
 
