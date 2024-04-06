@@ -208,10 +208,10 @@ class PatentPricesDetailsSerializer(ModelSerializer):
         fields = '__all__'
 
 
-class UnitOfMeasureSerializer(ModelSerializer):
-    class Meta:
-        model = UnitOfMeasure
-        fields = '__all__'
+# class UnitOfMeasureSerializer(ModelSerializer):
+#     class Meta:
+#         model = UnitOfMeasure
+#         fields = '__all__'
 
 
 class ClientSerializer(ModelSerializer):
