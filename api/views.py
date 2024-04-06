@@ -21,7 +21,7 @@ class SiteConfigAPIView(APIView):
             instance = get_object_or_404(SiteConfig, pk=pk)
             serializer = SiteConfigSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='application/json')
-        objs = SiteConfig.objects.all()
+        objs = SiteConfig.objects.all().order_by('id')
         serializers = SiteConfigSerializer(objs, many=True)
         return Response({"Response": serializers.data}, status=HTTP_200_OK, content_type='application/json')
 
@@ -80,7 +80,7 @@ class PermitDocCategoryAPIView(APIView):
             instance = get_object_or_404(PermitDocCategory, pk=pk)
             serializer = PermitDocCategorySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='application/json')
-        objects = PermitDocCategory.objects.all()
+        objects = PermitDocCategory.objects.all().order_by('id')
         serializers = PermitDocCategorySerializer(objects, many=True)
         return Response({"Response": serializers.data}, status=HTTP_200_OK, content_type='application/json')
 
@@ -136,7 +136,7 @@ class CitizenshipAPIView(APIView):
             instance = get_object_or_404(Citizenship, pk=pk)
             serializer = CitizenshipSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='application/json')
-        serializer = CitizenshipSerializer(instance=Citizenship.objects.all(), many=True)
+        serializer = CitizenshipSerializer(instance=Citizenship.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='application/json')
 
     @extend_schema(
@@ -189,7 +189,7 @@ class DocumentTypeAPIView(APIView):
             instance = get_object_or_404(DocumentType, pk=pk)
             serializer = DocumentTypeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = DocumentTypeSerializer(DocumentType.objects.all(), many=True)
+        serializer = DocumentTypeSerializer(DocumentType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -242,7 +242,7 @@ class Gen_DT_DocumentTypeAPIView(APIView):
             instance = get_object_or_404(Gen_DT_DocumentType, pk=pk)
             serializer = Gen_DT_DocumentTypeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_DocumentTypeSerializer(Gen_DT_DocumentType.objects.all(), many=True)
+        serializer = Gen_DT_DocumentTypeSerializer(Gen_DT_DocumentType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -295,7 +295,7 @@ class Gen_DT_CountryAPIView(APIView):
             instance = get_object_or_404(Gen_DT_Country, pk=pk)
             serializer = Gen_DT_CountrySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_CountrySerializer(Gen_DT_Country.objects.all(), many=True)
+        serializer = Gen_DT_CountrySerializer(Gen_DT_Country.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -348,7 +348,7 @@ class Gen_DT_DisciplineAPIView(APIView):
             instance = get_object_or_404(DocumentType, pk=pk)
             serializer = Gen_DT_DisciplineSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_DisciplineSerializer(Gen_DT_Discipline.objects.all(), many=True)
+        serializer = Gen_DT_DisciplineSerializer(Gen_DT_Discipline.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -401,7 +401,7 @@ class Gen_DT_EmpLevelAPIView(APIView):
             instance = get_object_or_404(Gen_DT_EmpLevel, pk=pk)
             serializer = Gen_DT_EmpLevelSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_EmpLevelSerializer(Gen_DT_EmpLevel.objects.all(), many=True)
+        serializer = Gen_DT_EmpLevelSerializer(Gen_DT_EmpLevel.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -454,7 +454,7 @@ class Gen_DT_EmpClassAPIView(APIView):
             instance = get_object_or_404(Gen_DT_EmpClass, pk=pk)
             serializer = Gen_DT_EmpClassSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_EmpClassSerializer(Gen_DT_EmpClass.objects.all(), many=True)
+        serializer = Gen_DT_EmpClassSerializer(Gen_DT_EmpClass.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -507,7 +507,7 @@ class Gen_DT_JobTitleAPIView(APIView):
             instance = get_object_or_404(DocumentType, pk=pk)
             serializer = Gen_DT_JobTitleSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_JobTitleSerializer(Gen_DT_JobTitle.objects.all(), many=True)
+        serializer = Gen_DT_JobTitleSerializer(Gen_DT_JobTitle.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -560,7 +560,7 @@ class Gen_DT_CurrencyAPIView(APIView):
             instance = get_object_or_404(Gen_DT_Currency, pk=pk)
             serializer = Gen_DT_CurrencySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_CurrencySerializer(Gen_DT_Currency.objects.all(), many=True)
+        serializer = Gen_DT_CurrencySerializer(Gen_DT_Currency.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -613,7 +613,7 @@ class Gen_DT_CBR_RatesAPIView(APIView):
             instance = get_object_or_404(Gen_DT_CBR_Rates, pk=pk)
             serializer = Gen_DT_CBR_RatesSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_CBR_RatesSerializer(Gen_DT_CBR_Rates.objects.all(), many=True)
+        serializer = Gen_DT_CBR_RatesSerializer(Gen_DT_CBR_Rates.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -666,7 +666,7 @@ class Gen_DT_CounterPartyAPIView(APIView):
             instance = get_object_or_404(Gen_DT_CounterParty, pk=pk)
             serializer = Gen_DT_CounterPartySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_CounterPartySerializer(Gen_DT_CounterParty.objects.all(), many=True)
+        serializer = Gen_DT_CounterPartySerializer(Gen_DT_CounterParty.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -719,7 +719,7 @@ class Gen_DT_SubjectOfRFAPIView(APIView):
             instance = get_object_or_404(Gen_DT_SubjectOfRF, pk=pk)
             serializer = Gen_DT_SubjectOfRFSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_SubjectOfRFSerializer(Gen_DT_SubjectOfRF.objects.all(), many=True)
+        serializer = Gen_DT_SubjectOfRFSerializer(Gen_DT_SubjectOfRF.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -772,7 +772,7 @@ class Gen_DT_ProjectAPIView(APIView):
             instance = get_object_or_404(Gen_DT_Project, pk=pk)
             serializer = Gen_DT_ProjectSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_ProjectSerializer(Gen_DT_Project.objects.all(), many=True)
+        serializer = Gen_DT_ProjectSerializer(Gen_DT_Project.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(
@@ -817,7 +817,7 @@ class Gen_DT_CounterPartyTypeAPIView(APIView):
             instance = get_object_or_404(Gen_DT_CounterPartyType, pk=pk)
             serializer = Gen_DT_CounterPartyTypeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_CounterPartyTypeSerializer(Gen_DT_CounterPartyType.objects.all(), many=True)
+        serializer = Gen_DT_CounterPartyTypeSerializer(Gen_DT_CounterPartyType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=SiteConfigSerializer, responses={HTTP_201_CREATED: Gen_DT_CounterPartyTypeSerializer()}, tags=['Gen_DT_CounterPartyType'])
@@ -854,7 +854,7 @@ class Gen_DT_ContractTypeAPIView(APIView):
             instance = get_object_or_404(Gen_DT_ContractType, pk=pk)
             serializer = Gen_DT_ContractTypeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_ContractTypeSerializer(Gen_DT_ContractType.objects.all(), many=True)
+        serializer = Gen_DT_ContractTypeSerializer(Gen_DT_ContractType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_ContractTypeSerializer()}, tags=['Gen_DT_ContractType'])
@@ -891,7 +891,7 @@ class Gen_DT_VAT_RateAPIView(APIView):
             instance = get_object_or_404(Gen_DT_VAT_Rate, pk=pk)
             serializer = Gen_DT_VAT_RateSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_VAT_RateSerializer(Gen_DT_VAT_Rate.objects.all(), many=True)
+        serializer = Gen_DT_VAT_RateSerializer(Gen_DT_VAT_Rate.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_201_CREATED: Gen_DT_VAT_RateSerializer()}, tags=['Gen_DT_VAT_Rate'])
@@ -928,7 +928,7 @@ class Gen_DT_UoMAPIView(APIView):
             instance = get_object_or_404(Gen_DT_UoM, pk=pk)
             serializer = Gen_DT_UoMSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_UoMSerializer(Gen_DT_UoM.objects.all(), many=True)
+        serializer = Gen_DT_UoMSerializer(Gen_DT_UoM.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_201_CREATED: Gen_DT_UoMSerializer()}, tags=['Gen_DT_UoM'])
@@ -965,7 +965,7 @@ class Gen_DT_BudgetDataAPIView(APIView):
             instance = get_object_or_404(Gen_DT_BudgetData, pk=pk)
             serializer = Gen_DT_BudgetDataSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_BudgetDataSerializer(Gen_DT_BudgetData.objects.all(), many=True)
+        serializer = Gen_DT_BudgetDataSerializer(Gen_DT_BudgetData.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_201_CREATED: Gen_DT_BudgetDataSerializer()}, tags=['Gen_DT_BudgetData'])
@@ -1002,7 +1002,7 @@ class Gen_DT_BudgetDataHistoryAPIView(APIView):
             instance = get_object_or_404(Gen_DT_BudgetDataHistory, pk=pk)
             serializer = Gen_DT_BudgetDataHistorySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_BudgetDataHistorySerializer(Gen_DT_BudgetDataHistory.objects.all(), many=True)
+        serializer = Gen_DT_BudgetDataHistorySerializer(Gen_DT_BudgetDataHistory.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_BudgetDataHistorySerializer, responses={HTTP_201_CREATED: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'])
@@ -1038,7 +1038,7 @@ class Gen_DT_ExpenseFrequencyAPIView(APIView):
             instance = get_object_or_404(Gen_DT_ExpenseFrequency, pk=pk)
             serializer = Gen_DT_ExpenseFrequencySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_ExpenseFrequencySerializer(Gen_DT_ExpenseFrequency.objects.all(), many=True)
+        serializer = Gen_DT_ExpenseFrequencySerializer(Gen_DT_ExpenseFrequency.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_ExpenseFrequencySerializer, responses={HTTP_201_CREATED: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'])
@@ -1075,7 +1075,7 @@ class Gen_DT_ExpenseTypeAPIView(APIView):
             instance = get_object_or_404(Gen_DT_ExpenseType, pk=pk)
             serializer = Gen_DT_ExpenseTypeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_ExpenseTypeSerializer(Gen_DT_ExpenseType.objects.all(), many=True)
+        serializer = Gen_DT_ExpenseTypeSerializer(Gen_DT_ExpenseType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_ExpenseTypeSerializer()}, tags=['Gen_DT_ExpenseType'])
@@ -1112,7 +1112,7 @@ class Gen_DT_LegalExpencesAPIView(APIView):
             instance = get_object_or_404(Gen_DT_LegalExpences, pk=pk)
             serializer = Gen_DT_LegalExpencesSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_LegalExpencesSerializer(Gen_DT_LegalExpences.objects.all(), many=True)
+        serializer = Gen_DT_LegalExpencesSerializer(Gen_DT_LegalExpences.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_201_CREATED: Gen_DT_LegalExpencesSerializer()}, tags=['Gen_DT_LegalExpences'])
@@ -1149,7 +1149,7 @@ class Gen_DT_EmpLegalStatusAPIView(APIView):
             instance = get_object_or_404(Gen_DT_EmpLegalStatus, pk=pk)
             serializer = Gen_DT_EmpLegalStatusSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_EmpLegalStatusSerializer(Gen_DT_EmpLegalStatus.objects.all(), many=True)
+        serializer = Gen_DT_EmpLegalStatusSerializer(Gen_DT_EmpLegalStatus.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpLegalStatusSerializer()}, tags=['Gen_DT_EmpLegalStatus'])
@@ -1186,7 +1186,7 @@ class Gen_DT_EmpTaxTypeAPIView(APIView):
             instance = get_object_or_404(Gen_DT_EmpTaxType, pk=pk)
             serializer = Gen_DT_EmpTaxTypeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_EmpTaxTypeSerializer(Gen_DT_EmpTaxType.objects.all(), many=True)
+        serializer = Gen_DT_EmpTaxTypeSerializer(Gen_DT_EmpTaxType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxTypeSerializer()}, tags=['Gen_DT_EmpTaxType'])
@@ -1223,7 +1223,7 @@ class Gen_DT_EmpTaxPayerAPIView(APIView):
             instance = get_object_or_404(Gen_DT_EmpTaxPayer, pk=pk)
             serializer = Gen_DT_EmpTaxPayerSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_EmpTaxPayerSerializer(Gen_DT_EmpTaxPayer.objects.all(), many=True)
+        serializer = Gen_DT_EmpTaxPayerSerializer(Gen_DT_EmpTaxPayer.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxPayerSerializer()}, tags=['Gen_DT_EmpTaxPayer'])
@@ -1260,7 +1260,7 @@ class Gen_DT_OurCompanyAPIView(APIView):
             instance = get_object_or_404(Gen_DT_OurCompany, pk=pk)
             serializer = Gen_DT_OurCompanySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_OurCompanySerializer(Gen_DT_OurCompany.objects.all(), many=True)
+        serializer = Gen_DT_OurCompanySerializer(Gen_DT_OurCompany.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()}, tags=['Gen_DT_OurCompany'])
@@ -1297,7 +1297,7 @@ class Gen_DT_ContractAPIView(APIView):
             instance = get_object_or_404(Gen_DT_Contract, pk=pk)
             serializer = Gen_DT_ContractSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_ContractSerializer(Gen_DT_Contract.objects.all(), many=True)
+        serializer = Gen_DT_ContractSerializer(Gen_DT_Contract.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_201_CREATED: Gen_DT_ContractSerializer()}, tags=['Gen_DT_Contract'])
@@ -1334,7 +1334,7 @@ class Gen_DT_EmpTaxCalcAPIView(APIView):
             instance = get_object_or_404(Gen_DT_EmpTaxCalc, pk=pk)
             serializer = Gen_DT_EmpTaxCalcSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_EmpTaxCalcSerializer(Gen_DT_EmpTaxCalc.objects.all(), many=True)
+        serializer = Gen_DT_EmpTaxCalcSerializer(Gen_DT_EmpTaxCalc.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxCalcSerializer()}, tags=['Gen_DT_EmpTaxCalc'])
@@ -1371,7 +1371,7 @@ class Gen_DT_PaymentBDHistoryAPIView(APIView):
             instance = get_object_or_404(Gen_DT_PaymentBDHistory, pk=pk)
             serializer = Gen_DT_PaymentBDHistorySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_PaymentBDHistorySerializer(Gen_DT_PaymentBDHistory.objects.all(), many=True)
+        serializer = Gen_DT_PaymentBDHistorySerializer(Gen_DT_PaymentBDHistory.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_PaymentBDHistorySerializer, responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'])
@@ -1408,7 +1408,7 @@ class Gen_DT_ProgressDocsAPIView(APIView):
             instance = get_object_or_404(Gen_DT_ProgressDocs, pk=pk)
             serializer = Gen_DT_ProgressDocsSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_ProgressDocsSerializer(Gen_DT_ProgressDocs.objects.all(), many=True)
+        serializer = Gen_DT_ProgressDocsSerializer(Gen_DT_ProgressDocs.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_201_CREATED: Gen_DT_ProgressDocsSerializer()}, tags=['Gen_DT_ProgressDocs'])
@@ -1445,7 +1445,7 @@ class Gen_DT_PaymentsAPIView(APIView):
             instance = get_object_or_404(Gen_DT_Payments, pk=pk)
             serializer = Gen_DT_PaymentsSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_PaymentsSerializer(Gen_DT_Payments.objects.all(), many=True)
+        serializer = Gen_DT_PaymentsSerializer(Gen_DT_Payments.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_201_CREATED: Gen_DT_PaymentsSerializer()}, tags=['Gen_DT_Payments'])
@@ -1482,7 +1482,7 @@ class DocAPIView(APIView):
             instance = get_object_or_404(Doc, pk=pk)
             serializer = DocSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = DocSerializer(Doc.objects.all(), many=True)
+        serializer = DocSerializer(Doc.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
     @extend_schema(request=DocSerializer, responses={HTTP_201_CREATED: DocSerializer()}, tags=['Doc'])
@@ -1520,7 +1520,7 @@ class DocBulkUploadAPIView(APIView):
             instance = get_object_or_404(DocBulkUpload, pk=pk)
             serializer = DocBulkUploadSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = DocBulkUploadSerializer(DocBulkUpload.objects.all(), many=True)
+        serializer = DocBulkUploadSerializer(DocBulkUpload.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
     @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()}, tags=['DocBulkUpload'])
@@ -1558,7 +1558,7 @@ class EmployeeAPIView(APIView):
             instance = get_object_or_404(Employee, pk=pk)
             serializer = EmployeeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = EmployeeSerializer(Employee.objects.all(), many=True)
+        serializer = EmployeeSerializer(Employee.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_201_CREATED: EmployeeSerializer()}, tags=['Employee'])
@@ -1596,7 +1596,7 @@ class EmployeeBulkUploadAPIView(APIView):
             instance = get_object_or_404(EmployeeBulkUpload, pk=pk)
             serializer = EmployeeBulkUploadSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = EmployeeBulkUploadSerializer(EmployeeBulkUpload.objects.all(), many=True)
+        serializer = EmployeeBulkUploadSerializer(EmployeeBulkUpload.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
     @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_201_CREATED: EmployeeBulkUploadSerializer()}, tags=['EmployeeBulkUpload'])
@@ -1634,7 +1634,7 @@ class PatentPricesDetailsAPIView(APIView):
             instance = get_object_or_404(PatentPricesDetails, pk=pk)
             serializer = PatentPricesDetailsSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = PatentPricesDetailsSerializer(PatentPricesDetails.objects.all(), many=True)
+        serializer = PatentPricesDetailsSerializer(PatentPricesDetails.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
     @extend_schema(request=PatentPricesDetailsSerializer, responses={HTTP_201_CREATED: PatentPricesDetailsSerializer()}, tags=['PatentPricesDetails'])
@@ -1662,43 +1662,43 @@ class PatentPricesDetailsAPIView(APIView):
         serializer = PatentPricesDetailsSerializer(obj)
         return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
-
-class UnitOfMeasureAPIView(APIView):
-    renderer_classes = [JSONRenderer]
-
-    @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
-    def get(self, request, pk=None, *args, **kwargs):
-        if pk:
-            instance = get_object_or_404(UnitOfMeasure, pk=pk)
-            serializer = UnitOfMeasureSerializer(instance=instance)
-            return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = UnitOfMeasureSerializer(UnitOfMeasure.objects.all(), many=True)
-        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
-
-    @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_201_CREATED: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
-    def post(self, request, *args, **kwargs):
-        serializer = UnitOfMeasureSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
-                            content_type='multipart/form-data')
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
-
-    @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
-    def put(self, request, pk, *args, **kwargs):
-        instance = get_object_or_404(UnitOfMeasure, pk=pk)
-        serializer = UnitOfMeasureSerializer(instance=instance, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK,
-                            content_type='multipart/form-data')
-
-    @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
-    def delete(self, request, pk):
-        obj = get_object_or_404(UnitOfMeasure, pk=pk)
-        obj.delete()
-        serializer = UnitOfMeasureSerializer(obj)
-        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+#
+# class UnitOfMeasureAPIView(APIView):
+#     renderer_classes = [JSONRenderer]
+#
+#     @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
+#     def get(self, request, pk=None, *args, **kwargs):
+#         if pk:
+#             instance = get_object_or_404(UnitOfMeasure, pk=pk)
+#             serializer = UnitOfMeasureSerializer(instance=instance)
+#             return Response({"Response": serializer.data}, status=HTTP_200_OK)
+#         serializer = UnitOfMeasureSerializer(UnitOfMeasure.objects.all().order_by('id'), many=True)
+#         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+#
+#     @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_201_CREATED: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
+#     def post(self, request, *args, **kwargs):
+#         serializer = UnitOfMeasureSerializer(data=request.data)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
+#                             content_type='multipart/form-data')
+#         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+#
+#     @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
+#     def put(self, request, pk, *args, **kwargs):
+#         instance = get_object_or_404(UnitOfMeasure, pk=pk)
+#         serializer = UnitOfMeasureSerializer(instance=instance, data=request.data, partial=True)
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK,
+#                             content_type='multipart/form-data')
+#
+#     @extend_schema(request=UnitOfMeasureSerializer, responses={HTTP_200_OK: UnitOfMeasureSerializer()}, tags=['UnitOfMeasure'])
+#     def delete(self, request, pk):
+#         obj = get_object_or_404(UnitOfMeasure, pk=pk)
+#         obj.delete()
+#         serializer = UnitOfMeasureSerializer(obj)
+#         return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
 
 class ClientAPIView(APIView):
@@ -1710,7 +1710,7 @@ class ClientAPIView(APIView):
             instance = get_object_or_404(Client, pk=pk)
             serializer = ClientSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = ClientSerializer(Client.objects.all(), many=True)
+        serializer = ClientSerializer(Client.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
     @extend_schema(request=ClientSerializer, responses={HTTP_201_CREATED: ClientSerializer()}, tags=['Client'])
