@@ -2,7 +2,13 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="34203847-71db-49f7-89af-ff9e39d03f17" name="Default Changelist" comment="">
+<<<<<<< Updated upstream
       <change beforePath="$PROJECT_DIR$/api/serializers.py" beforeDir="false" afterPath="$PROJECT_DIR$/api/serializers.py" afterDir="false" />
+=======
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_29_03_2024_14_55_[Default_Changelist]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_29_03_2024_14_55__Default_Changelist_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+>>>>>>> Stashed changes
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,10 +119,21 @@
       <workItem from="1711705107361" duration="2068000" />
       <workItem from="1711725288092" duration="1085000" />
       <workItem from="1711784643122" duration="101000" />
+<<<<<<< Updated upstream
       <workItem from="1712165925430" duration="111000" />
       <workItem from="1712166057148" duration="2436000" />
       <workItem from="1712342425530" duration="1761000" />
       <workItem from="1712414041087" duration="1867000" />
+=======
+      <workItem from="1712040238376" duration="1127000" />
+      <workItem from="1712165574781" duration="271000" />
+      <workItem from="1712439150225" duration="7000" />
+      <workItem from="1712439163925" duration="15000" />
+      <workItem from="1712439253490" duration="3000" />
+      <workItem from="1712479270938" duration="5000" />
+      <workItem from="1712481489292" duration="131000" />
+      <workItem from="1712482863314" duration="1485000" />
+>>>>>>> Stashed changes
     </task>
     <servers />
   </component>
