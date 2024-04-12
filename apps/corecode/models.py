@@ -633,7 +633,7 @@ class Gen_DT_Payments(models.Model):
         return self.PaymentID_1C
 
 
-class PatentPricesDetails(models.Model):
+class Gen_DT_PatentPricesDetails(models.Model):
     """PatentPricesDetail"""
     SubjectofRF_ID = models.ForeignKey(Gen_DT_SubjectOfRF, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Gen_DT_SubjectOfRF")
     RegionalCoefficient_Base = models.CharField(max_length=256)
@@ -649,7 +649,7 @@ class PatentPricesDetails(models.Model):
         return self.RegionalCoefficient_Base
 
 
-class Client(models.Model):
+class Gen_DT_Client(models.Model):
     """Client"""
     ClientID = models.IntegerField()
     ClientShortNameRU = models.CharField(max_length=56)

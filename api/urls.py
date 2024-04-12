@@ -78,6 +78,6 @@ urlpatterns = [
     path('employee-bulk-upload/', EmployeeBulkUploadAPIView.as_view(), name='employee_bulk_upload'),
     path('patent-prices-details/<int:pk>/', PatentPricesDetailsAPIView.as_view(), name='patent_prices_details_one'),
     path('patent-prices-details/', PatentPricesDetailsAPIView.as_view(), name='patent_prices_details'),
-    path('cliet/<int:pk>/', ClientAPIView.as_view(), name='client_one'),
-    path('cliet/', ClientAPIView.as_view(), name='client'),
+    path('client/<int:pk>/', ClientAPIView.as_view(), name='client_one'),
+    path('client/', ClientAPIView.as_view(), name='client'),
 ]
