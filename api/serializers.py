@@ -202,7 +202,7 @@ class Gen_DT_PaymentsSerializer(ModelSerializer):
         fields = '__all__'
 
 
-class PatentPricesDetailsSerializer(ModelSerializer):
+class Gen_DT_PatentPricesDetailsSerializer(ModelSerializer):
     class Meta:
         model = Gen_DT_PatentPricesDetails
         fields = '__all__'
@@ -214,7 +214,7 @@ class PatentPricesDetailsSerializer(ModelSerializer):
 #         fields = '__all__'
 
 
-class ClientSerializer(ModelSerializer):
+class Gen_DT_ClientSerializer(ModelSerializer):
     class Meta:
         model = Gen_DT_Client
         fields = '__all__'
