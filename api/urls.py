@@ -1,7 +1,13 @@
 from django.urls import path
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
 from .views import *
 
 urlpatterns = [
+    path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('siteconfig/<int:pk>/', SiteConfigAPIView.as_view(), name='site_config_one'),
     path('siteconfig/', SiteConfigAPIView.as_view(), name='site_config'),
     path('permitdoc/cat/<int:pk>/', PermitDocCategoryAPIView.as_view(), name='permit_doc_cat_one'),
@@ -76,8 +82,8 @@ urlpatterns = [
     path('employee/', EmployeeAPIView.as_view(), name='employee'),
     path('employee-bulk-upload/<int:pk>/', EmployeeBulkUploadAPIView.as_view(), name='employee_bulk_upload_one'),
     path('employee-bulk-upload/', EmployeeBulkUploadAPIView.as_view(), name='employee_bulk_upload'),
-    path('patent-prices-details/<int:pk>/', PatentPricesDetailsAPIView.as_view(), name='patent_prices_details_one'),
+    path('patent-prices-details/<int:pk>/', Gen_DT_PatentPricesDetailsAPIView.as_view(), name='patent_prices_details_one'),
     path('patent-prices-details/', Gen_DT_PatentPricesDetailsAPIView.as_view(), name='patent_prices_details'),
-    path('client/<int:pk>/', Gen_DT_PatentPricesDetailsAPIView.as_view(), name='client_one'),
+    path('client/<int:pk>/', Gen_DT_ClientAPIView.as_view(), name='client_one'),
     path('client/', Gen_DT_ClientAPIView.as_view(), name='client'),
 ]
