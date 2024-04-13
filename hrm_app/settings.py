@@ -17,10 +17,10 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 import os
 
-# load_dotenv()
+load_dotenv()
 
 # DEBUG=True
 
@@ -28,8 +28,8 @@ import os
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-# SECRET_KEY = os.environ.get('SECRET_KEY')
-SECRET_KEY = 'qwewqe'
+SECRET_KEY = os.environ.get('SECRET_KEY')
+# SECRET_KEY = 'qwewqe'
 # SECURITY WARNING: don't run with debug turned on in production!
 # Render Deployment Code
 DEBUG = 'RENDER' not in os.environ
@@ -38,7 +38,7 @@ CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net", "http://shar
 
 ALLOWED_HOSTS = ['https://shariforz-plain2do-970b.twc1.net', "http://shariforz-plain2do-970b.twc1.net",
                  "shariforz-plain2do-970b.twc1.net"]
-ALLOWED_HOSTS = ['*']
+# ALLOWED_HOSTS = ['*']
 
 # Application definition
 
