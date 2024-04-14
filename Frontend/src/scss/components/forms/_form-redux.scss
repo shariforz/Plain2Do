@@ -1,0 +1,19 @@
+.redux-form-input{	
+	height: 50px;
+    border-bottom: 2px solid #000;
+    border-width: 0 0 2px 0;
+    margin-bottom: 30px;
+    font-size: 14px;
+    display: block;
+    width: 100%;
+}
+.validate-redux-form{
+	.input-field-redux{
+		width: 100% !important;
+		
+		label{
+			color: rgba(0,0,0,0.7) !important;
+		}
+		
+	}
+}
