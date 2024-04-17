@@ -11,7 +11,7 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 
 class SiteConfigAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=SiteConfigSerializer,  # Specify the serializer for the request
@@ -72,7 +72,7 @@ class SiteConfigAPIView(APIView):
 
 class PermitDocCategoryAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=PermitDocCategorySerializer,  # Specify the serializer for the request
@@ -129,7 +129,7 @@ class PermitDocCategoryAPIView(APIView):
 
 class CitizenshipAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     @extend_schema(
         request=CitizenshipSerializer,  # Specify the serializer for the request
         responses={HTTP_200_OK: CitizenshipSerializer()},
@@ -183,7 +183,7 @@ class CitizenshipAPIView(APIView):
 
 class DocumentTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=DocumentTypeSerializer,  # Specify the serializer for the request
@@ -238,7 +238,7 @@ class DocumentTypeAPIView(APIView):
 
 class Gen_DT_DocumentTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_DocumentTypeSerializer,  # Specify the serializer for the request
@@ -293,7 +293,7 @@ class Gen_DT_DocumentTypeAPIView(APIView):
 
 class Gen_DT_CountryAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_CountrySerializer,  # Specify the serializer for the request
@@ -348,7 +348,7 @@ class Gen_DT_CountryAPIView(APIView):
 
 class Gen_DT_DisciplineAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_DisciplineSerializer,  # Specify the serializer for the request
@@ -403,7 +403,7 @@ class Gen_DT_DisciplineAPIView(APIView):
 
 class Gen_DT_EmpLevelAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_EmpLevelSerializer,  # Specify the serializer for the request
@@ -458,7 +458,7 @@ class Gen_DT_EmpLevelAPIView(APIView):
 
 class Gen_DT_EmpClassAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_EmpClassSerializer,  # Specify the serializer for the request
@@ -513,7 +513,7 @@ class Gen_DT_EmpClassAPIView(APIView):
 
 class Gen_DT_JobTitleAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_JobTitleSerializer,  # Specify the serializer for the request
@@ -568,7 +568,7 @@ class Gen_DT_JobTitleAPIView(APIView):
 
 class Gen_DT_CurrencyAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_CurrencySerializer,  # Specify the serializer for the request
@@ -623,7 +623,7 @@ class Gen_DT_CurrencyAPIView(APIView):
 
 class Gen_DT_CBR_RatesAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_CBR_RatesSerializer,  # Specify the serializer for the request
@@ -678,7 +678,7 @@ class Gen_DT_CBR_RatesAPIView(APIView):
 
 class Gen_DT_CounterPartyAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_CounterPartySerializer,  # Specify the serializer for the request
@@ -733,7 +733,7 @@ class Gen_DT_CounterPartyAPIView(APIView):
 
 class Gen_DT_SubjectOfRFAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_SubjectOfRFSerializer,  # Specify the serializer for the request
@@ -788,7 +788,7 @@ class Gen_DT_SubjectOfRFAPIView(APIView):
 
 class Gen_DT_ProjectAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_ProjectSerializer,  # Specify the serializer for the request
@@ -839,7 +839,7 @@ class Gen_DT_ProjectAPIView(APIView):
 
 class Gen_DT_CounterPartyTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=SiteConfigSerializer, responses={HTTP_200_OK: Gen_DT_CounterPartyTypeSerializer()}, tags=['Gen_DT_CounterPartyType'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -878,7 +878,7 @@ class Gen_DT_CounterPartyTypeAPIView(APIView):
 
 class Gen_DT_ContractTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_200_OK: Gen_DT_ContractTypeSerializer()}, tags=['Gen_DT_ContractType'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -917,7 +917,7 @@ class Gen_DT_ContractTypeAPIView(APIView):
 
 class Gen_DT_VAT_RateAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_200_OK: Gen_DT_VAT_RateSerializer()}, tags=['Gen_DT_VAT_Rate'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -956,7 +956,7 @@ class Gen_DT_VAT_RateAPIView(APIView):
 
 class Gen_DT_UoMAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_200_OK: Gen_DT_UoMSerializer()}, tags=['Gen_DT_UoM'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -995,7 +995,7 @@ class Gen_DT_UoMAPIView(APIView):
 
 class Gen_DT_BudgetDataAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()}, tags=['Gen_DT_BudgetData'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1034,7 +1034,7 @@ class Gen_DT_BudgetDataAPIView(APIView):
 
 class Gen_DT_BudgetDataHistoryAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_BudgetDataHistorySerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1072,7 +1072,7 @@ class Gen_DT_BudgetDataHistoryAPIView(APIView):
 
 class Gen_DT_ExpenseFrequencyAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ExpenseFrequencySerializer, responses={HTTP_200_OK: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1111,7 +1111,7 @@ class Gen_DT_ExpenseFrequencyAPIView(APIView):
 
 class Gen_DT_ExpenseTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()}, tags=['Gen_DT_ExpenseType'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1150,7 +1150,7 @@ class Gen_DT_ExpenseTypeAPIView(APIView):
 
 class Gen_DT_LegalExpencesAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()}, tags=['Gen_DT_LegalExpences'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1189,7 +1189,7 @@ class Gen_DT_LegalExpencesAPIView(APIView):
 
 class Gen_DT_EmpLegalStatusAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()}, tags=['Gen_DT_EmpLegalStatus'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1228,7 +1228,7 @@ class Gen_DT_EmpLegalStatusAPIView(APIView):
 
 class Gen_DT_EmpTaxTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxTypeSerializer()}, tags=['Gen_DT_EmpTaxType'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1267,7 +1267,7 @@ class Gen_DT_EmpTaxTypeAPIView(APIView):
 
 class Gen_DT_EmpTaxPayerAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxPayerSerializer()}, tags=['Gen_DT_EmpTaxPayer'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1306,7 +1306,7 @@ class Gen_DT_EmpTaxPayerAPIView(APIView):
 
 class Gen_DT_OurCompanyAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()}, tags=['Gen_DT_OurCompany'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1345,7 +1345,7 @@ class Gen_DT_OurCompanyAPIView(APIView):
 
 class Gen_DT_ContractAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_200_OK: Gen_DT_ContractSerializer()}, tags=['Gen_DT_Contract'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1384,7 +1384,7 @@ class Gen_DT_ContractAPIView(APIView):
 
 class Gen_DT_EmpTaxCalcAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxCalcSerializer()}, tags=['Gen_DT_EmpTaxCalc'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1423,7 +1423,7 @@ class Gen_DT_EmpTaxCalcAPIView(APIView):
 
 class Gen_DT_PaymentBDHistoryAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_PaymentBDHistorySerializer, responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1462,7 +1462,7 @@ class Gen_DT_PaymentBDHistoryAPIView(APIView):
 
 class Gen_DT_ProgressDocsAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_200_OK: Gen_DT_ProgressDocsSerializer()}, tags=['Gen_DT_ProgressDocs'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1501,7 +1501,7 @@ class Gen_DT_ProgressDocsAPIView(APIView):
 
 class Gen_DT_PaymentsAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_200_OK: Gen_DT_PaymentsSerializer()}, tags=['Gen_DT_Payments'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1540,7 +1540,7 @@ class Gen_DT_PaymentsAPIView(APIView):
 
 class DocAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=DocSerializer, responses={HTTP_200_OK: DocSerializer()}, tags=['Doc'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1580,7 +1580,7 @@ class DocAPIView(APIView):
 
 class DocBulkUploadAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()}, tags=['DocBulkUpload'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1620,7 +1620,7 @@ class DocBulkUploadAPIView(APIView):
 
 class EmployeeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_200_OK: EmployeeSerializer()}, tags=['Employee'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1660,7 +1660,7 @@ class EmployeeAPIView(APIView):
 
 class EmployeeBulkUploadAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_200_OK: EmployeeBulkUploadSerializer()}, tags=['EmployeeBulkUpload'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1700,7 +1700,7 @@ class EmployeeBulkUploadAPIView(APIView):
 
 class Gen_DT_PatentPricesDetailsAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer, responses={HTTP_200_OK: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'])
     def get(self, request, pk=None, *args, **kwargs):
@@ -1740,7 +1740,7 @@ class Gen_DT_PatentPricesDetailsAPIView(APIView):
 
 class Gen_DT_ClientAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()}, tags=['Gen_DT_Client'])
     def get(self, request, pk=None, *args, **kwargs):
