@@ -13,26 +13,24 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 import os
 from django.utils.translation import gettext_lazy as _
 from datetime import timedelta
-import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 from dotenv import load_dotenv
-import os
 
 load_dotenv()
-
-# DEBUG=True
+#
+DEBUG = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get('SECRET_KEY')
-# SECRET_KEY = 'qwewqe'
+# SECRET_KEY = os.environ.get('SECRET_KEY')
+SECRET_KEY = 'qwewqe'
 # SECURITY WARNING: don't run with debug turned on in production!
 # Render Deployment Code
-DEBUG = 'RENDER' not in os.environ
+# DEBUG = 'RENDER' not in os.environ
 CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net", "http://shariforz-plain2do-970b.twc1.net",
                         "http://91.210.170.174"]
 
@@ -109,38 +107,38 @@ WSGI_APPLICATION = "hrm_app.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/3.0/ref/settings/#databases
 
-DB_ENGINE = os.getenv('DB_ENGINE', None)
-DB_USERNAME = os.getenv('DB_USERNAME', None)
-DB_PASS = os.getenv('DB_PASS', None)
-DB_HOST = os.getenv('DB_HOST', None)
-DB_PORT = os.getenv('DB_PORT', None)
-DB_NAME = os.getenv('DB_NAME', None)
+# DB_ENGINE = os.getenv('DB_ENGINE', None)
+# DB_USERNAME = os.getenv('DB_USERNAME', None)
+# DB_PASS = os.getenv('DB_PASS', None)
+# DB_HOST = os.getenv('DB_HOST', None)
+# DB_PORT = os.getenv('DB_PORT', None)
+# DB_NAME = os.getenv('DB_NAME', None)
+#
+# if DB_ENGINE and DB_NAME and DB_USERNAME:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.' + DB_ENGINE,
+#             'NAME': DB_NAME,
+#             'USER': DB_USERNAME,
+#             'PASSWORD': DB_PASS,
+#             'HOST': DB_HOST,
+#             'PORT': DB_PORT,
+#         },
+#     }
+# else:
+#     DATABASES = {
+#         'default': {
+#             'ENGINE': 'django.db.backends.sqlite3',
+#             'NAME': 'db.sqlite3',
+#         }
+#     }
 
-if DB_ENGINE and DB_NAME and DB_USERNAME:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.' + DB_ENGINE,
-            'NAME': DB_NAME,
-            'USER': DB_USERNAME,
-            'PASSWORD': DB_PASS,
-            'HOST': DB_HOST,
-            'PORT': DB_PORT,
-        },
-    }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'db.sqlite3',
-        }
-    }
-
-# DATABASES = {
-#    "default": {
-#        "ENGINE": "django.db.backends.sqlite3",
-#        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
-#    }
-# }
+DATABASES = {
+   "default": {
+       "ENGINE": "django.db.backends.sqlite3",
+       'NAME': 'db.sqlite3',
+   }
+}
 
 
 # Password validation
@@ -251,14 +249,11 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
 # Site Default values
-import os
 
-STATIC_URL = 'static/'
 STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
 REST_FRAMEWORK = {
-    # YOUR SETTINGS
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
@@ -272,14 +267,14 @@ SPECTACULAR_SETTINGS = {
 }
 
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
-    "ROTATE_REFRESH_TOKENS": False,
+    "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
 
     "ALGORITHM": "HS256",
-    # "SIGNING_KEY": settings.SECRET_KEY,
+    "SIGNING_KEY": SECRET_KEY,
     "VERIFYING_KEY": "",
     "AUDIENCE": None,
     "ISSUER": None,
@@ -300,8 +295,8 @@ SIMPLE_JWT = {
     "JTI_CLAIM": "jti",
 
     "SLIDING_TOKEN_REFRESH_EXP_CLAIM": "refresh_exp",
-    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=5),
-    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=1),
+    "SLIDING_TOKEN_LIFETIME": timedelta(minutes=30),
+    "SLIDING_TOKEN_REFRESH_LIFETIME": timedelta(days=30),
 
     "TOKEN_OBTAIN_SERIALIZER": "rest_framework_simplejwt.serializers.TokenObtainPairSerializer",
     "TOKEN_REFRESH_SERIALIZER": "rest_framework_simplejwt.serializers.TokenRefreshSerializer",
