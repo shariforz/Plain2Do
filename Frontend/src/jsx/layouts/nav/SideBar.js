@@ -5,12 +5,12 @@ import React, { Component, useContext, useEffect } from "react";
 import PerfectScrollbar from "react-perfect-scrollbar";
 /// Link
 import { Link } from "react-router-dom";
-// import { Dropdown } from "react-bootstrap";
+import { Dropdown } from "react-bootstrap";
 import useScrollPosition from "use-scroll-position";
 import { ThemeContext } from "../../../context/ThemeContext";
-// import LogoutPage from "./Logout";
-// /// Image
-// import profile from "../../../images/profile/pic1.jpg";
+import LogoutPage from "./Logout";
+/// Image
+import profile from "../../../images/profile/pic1.jpg";
 
 class MM extends Component {
   componentDidMount() {
@@ -45,6 +45,7 @@ const SideBar = () => {
   let path = window.location.pathname;
   path = path.split("/");
   path = path[path.length - 1];
+
   /// Active menu
   let deshBoard = [
       "",
@@ -56,6 +57,25 @@ const SideBar = () => {
       "transaction-details",
     ],
     projects = ["List Projects", "Budgets", "Gantt chart", "Labor Demand List"],
+    myTasks = ["Kanban Board", "Pending tasks"],
+    employee = [
+      "Employee general list ",
+      "Employee card",
+      "Personal information",
+      "Employment Documents",
+      "Certificates",
+      "Cost Centre Transfer History",
+      "Timesheet",
+      "Payroll",
+    ],
+    generalList = [
+      "Employee card",
+      "Personal information",
+      "Employment Documents",
+      "Certificates",
+      "Cost Centre Transfer History",
+    ],
+    dashboards = ["Statistics", "Analytical reports"],
     app = [
       "app-profile",
       "post-details",
@@ -160,7 +180,7 @@ const SideBar = () => {
     >
       <PerfectScrollbar className="dlabnav-scroll">
         <MM className="metismenu" id="menu">
-          {/* <Dropdown as="li" className="nav-item dropdown header-profile">
+          <Dropdown as="li" className="nav-item dropdown header-profile">
             <Dropdown.Toggle
               variant=""
               as="a"
@@ -222,7 +242,7 @@ const SideBar = () => {
               </Link>
               <LogoutPage />
             </Dropdown.Menu>
-          </Dropdown> */}
+          </Dropdown>
           <li className={`${projects.includes(path) ? "mm-active" : ""}`}>
             <Link className="has-arrow ai-icon" to="#">
               <i className="flaticon-381-layer-1"></i>
@@ -231,11 +251,177 @@ const SideBar = () => {
             <ul>
               <li>
                 <Link
-                  className={`${path === "" ? "mm-active" : "dashboard"}`}
+                  className={`${path === "" ? "mm-active" : "projects"}`}
                   to="/projects"
                 >
                   {" "}
                   List Projects
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`${path === "" ? "mm-active" : "budgets"}`}
+                  to="/budgets"
+                >
+                  {" "}
+                  Budgets
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`${path === "" ? "mm-active" : "gantt-chart"}`}
+                  to="/gantt-chart"
+                >
+                  {" "}
+                  Gantt chart
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`${path === "" ? "mm-active" : "labor-demand"}`}
+                  to="/labor-demand"
+                >
+                  {" "}
+                  Labor Demand List
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li className={`${myTasks.includes(path) ? "mm-active" : ""}`}>
+            <Link className="has-arrow ai-icon" to="#">
+              <i className="flaticon-381-list-1"></i>
+              <span className="nav-text">My Tasks</span>
+            </Link>
+            <ul>
+              <li>
+                <Link
+                  className={`${path === "" ? "mm-active" : "kanban-board"}`}
+                  to="/kanban-board"
+                >
+                  {" "}
+                  Kanban-board
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`${path === "" ? "mm-active" : "pending-tasks"}`}
+                  to="/pending-tasks"
+                >
+                  {" "}
+                  Pending-tasks
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li className={`${employee.includes(path) ? "mm-active" : ""}`}>
+            <Link className="has-arrow ai-icon" to="#">
+              <i className="flaticon-381-user-4"></i>
+              <span className="nav-text">Employee</span>
+            </Link>
+            <ul>
+              <li
+                className={`${generalList.includes(path) ? "mm-active" : ""}`}
+              >
+                <Link className="has-arrow" to="#">
+                  Employee general list
+                </Link>
+                <ul
+                  className={`${generalList.includes(path) ? "mm-show" : ""}`}
+                >
+                  <li>
+                    <Link
+                      className={`${
+                        path === "employee-card" ? "mm-active" : ""
+                      }`}
+                      to="/employee-card"
+                    >
+                      Employee card
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`${
+                        path === "personal-information" ? "mm-active" : ""
+                      }`}
+                      to="/personal-information"
+                    >
+                      Personal Information
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`${
+                        path === "employee-documents" ? "mm-active" : ""
+                      }`}
+                      to="/employee-documents"
+                    >
+                      Employee Documents
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`${
+                        path === "certificates" ? "mm-active" : ""
+                      }`}
+                      to="/certificates"
+                    >
+                      Certificates
+                    </Link>
+                  </li>
+                  <li>
+                    <Link
+                      className={`${path === "cost-centre" ? "mm-active" : ""}`}
+                      to="/cost-centre"
+                    >
+                      Cost Centre Transfer History
+                    </Link>
+                  </li>
+                </ul>
+              </li>
+              <li>
+                <Link
+                  className={`${path === "" ? "mm-active" : "timesheet"}`}
+                  to="/timesheet"
+                >
+                  {" "}
+                  Timesheet
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`${path === "" ? "mm-active" : "payroll"}`}
+                  to="/payroll"
+                >
+                  {" "}
+                  Payroll
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li className={`${dashboards.includes(path) ? "mm-active" : ""}`}>
+            <Link className="has-arrow ai-icon" to="#">
+              <i className="flaticon-025-dashboard"></i>
+              <span className="nav-text">Dashboards</span>
+            </Link>
+            <ul>
+              <li>
+                <Link
+                  className={`${path === "" ? "mm-active" : "statistics"}`}
+                  to="/statistics"
+                >
+                  {" "}
+                  Statistics
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className={`${
+                    path === "" ? "mm-active" : "analytical-reports"
+                  }`}
+                  to="/analytical-reports"
+                >
+                  {" "}
+                  Analytical reports
                 </Link>
               </li>
             </ul>

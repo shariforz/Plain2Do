@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "homepage": "https://dompet.dexignlab.com/react/demo",
   "private": true,
-  "proxy": "https://shariforz-plain2do-970b.twc1.net",
   "dependencies": {
     "@date-io/date-fns": "^1.3.13",
     "@fullcalendar/core": "^5.4.0",

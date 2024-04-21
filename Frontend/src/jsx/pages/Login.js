@@ -105,7 +105,6 @@ function Login(props) {
                             <strong>Email</strong>
                           </label>
                           <input
-                            type="email"
                             className="form-control"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}

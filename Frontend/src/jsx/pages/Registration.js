@@ -70,6 +70,7 @@ function Register(props) {
                           <strong>Email</strong>
                         </label>
                         <input
+                          type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className="form-control"
