@@ -13,9 +13,9 @@ export const LOGIN_FAILED_ACTION = "[login action] failed login";
 export const LOADING_TOGGLE_ACTION = "[Loading action] toggle loading";
 export const LOGOUT_ACTION = "[Logout action] logout action";
 
-export function signupAction(email, password, history) {
+export function signupAction(username, password, history) {
   return (dispatch) => {
-    signUp(email, password)
+    signUp(username, password)
       .then((response) => {
         saveTokenInLocalStorage(response.data);
         runLogoutTimer(dispatch, response.data.expiresIn * 1000, history);
@@ -37,9 +37,9 @@ export function logout(history) {
   };
 }
 
-export function loginAction(email, password, history) {
+export function loginAction(username, password, history) {
   return (dispatch) => {
-    login(email, password)
+    login(username, password)
       .then((response) => {
         saveTokenInLocalStorage(response.data);
         runLogoutTimer(dispatch, response.data.expiresIn * 1000, history);

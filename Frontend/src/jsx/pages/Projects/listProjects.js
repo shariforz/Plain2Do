@@ -64,6 +64,8 @@ const tableList = [
 ];
 
 const Todo = () => {
+  const parser = JSON.parse(localStorage.getItem("userDetails"));
+  const token = parser.accessToken;
   const [contents, setContents] = useState(tableList);
   const [filters, setFilters] = useState({
     name: "",
@@ -98,16 +100,36 @@ const Todo = () => {
   });
 
   useEffect(() => {
-    // Fetch data from your API endpoint
-    fetch("https://test.teamq.uz/api/gendt/project/")
-      .then((response) => response.json())
+    if (!token) {
+      console.error("No access token available.");
+      return;
+    }
+
+    const url = "https://test.teamq.uz/api/citizenship/";
+
+    const requestOptions = {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    };
+
+    fetch(url, requestOptions)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then((data) => {
         console.log(data);
+        setContents(data);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
       });
-  }, []);
+  }, [token]);
 
   const handleAddFormChange = (event) => {
     event.preventDefault();
@@ -176,62 +198,62 @@ const Todo = () => {
     setEditFormData(formValues);
   };
 
-  const renderTableRows = () => {
-    const filteredContents = contents.filter((content) => {
-      return Object.keys(filters).every((key) => {
-        if (!filters[key]) return true;
-        return content[key].toLowerCase().includes(filters[key].toLowerCase());
-      });
-    });
+  // const renderTableRows = () => {
+  //   const filteredContents = contents.filter((content) => {
+  //     return Object.keys(filters).every((key) => {
+  //       if (!filters[key]) return true;
+  //       return content[key].toLowerCase().includes(filters[key].toLowerCase());
+  //     });
+  //   });
 
-    return filteredContents.map((content) => {
-      if (editContentId === content.id) {
-        return (
-          <Editable
-            key={content.id}
-            editFormData={editFormData}
-            handleEditFormChange={handleEditFormChange}
-            handleCancelClick={handleCancelClick}
-          />
-        );
-      } else {
-        return (
-          <tr key={content.id}>
-            <td>{content.name}</td>
-            <td>{content.department}</td>
-            <td>{content.gender}</td>
-            <td>{content.education}</td>
-            <td>
-              <Link to={"#"}>
-                <strong>{content.mobile}</strong>
-              </Link>
-            </td>
-            <td>
-              <Link to={"#"}>
-                <strong>{content.email}</strong>
-              </Link>
-            </td>
-            <td>
-              <div className="d-flex">
-                <Link
-                  className="btn btn-secondary shadow btn-xs sharp me-2"
-                  onClick={(event) => handleEditClick(event, content)}
-                >
-                  <i className="fa fa-pencil"></i>
-                </Link>
-                <Link
-                  className="btn btn-danger shadow btn-xs sharp"
-                  onClick={() => handleDeleteClick(content.id)}
-                >
-                  <i className="fa fa-trash"></i>
-                </Link>
-              </div>
-            </td>
-          </tr>
-        );
-      }
-    });
-  };
+  //   return filteredContents.map((content) => {
+  //     if (editContentId === content.id) {
+  //       return (
+  //         <Editable
+  //           key={content.id}
+  //           editFormData={editFormData}
+  //           handleEditFormChange={handleEditFormChange}
+  //           handleCancelClick={handleCancelClick}
+  //         />
+  //       );
+  //     } else {
+  //       return (
+  //         <tr key={content.id}>
+  //           <td>{content.name}</td>
+  //           <td>{content.department}</td>
+  //           <td>{content.gender}</td>
+  //           <td>{content.education}</td>
+  //           <td>
+  //             <Link to={"#"}>
+  //               <strong>{content.mobile}</strong>
+  //             </Link>
+  //           </td>
+  //           <td>
+  //             <Link to={"#"}>
+  //               <strong>{content.email}</strong>
+  //             </Link>
+  //           </td>
+  //           <td>
+  //             <div className="d-flex">
+  //               <Link
+  //                 className="btn btn-secondary shadow btn-xs sharp me-2"
+  //                 onClick={(event) => handleEditClick(event, content)}
+  //               >
+  //                 <i className="fa fa-pencil"></i>
+  //               </Link>
+  //               <Link
+  //                 className="btn btn-danger shadow btn-xs sharp"
+  //                 onClick={() => handleDeleteClick(content.id)}
+  //               >
+  //                 <i className="fa fa-trash"></i>
+  //               </Link>
+  //             </div>
+  //           </td>
+  //         </tr>
+  //       );
+  //     }
+  //   });
+  // };
 
   const handleEditFormChange = (event) => {
     event.preventDefault();
@@ -349,7 +371,7 @@ const Todo = () => {
                         </th>
                       </tr>
                     </thead>
-                    <tbody>{renderTableRows()}</tbody>
+                    {/* <tbody>{renderTableRows()}</tbody> */}
                   </table>
                 </form>
               </div>

@@ -2,10 +2,10 @@ import axios from "axios";
 import swal from "sweetalert";
 import { loginConfirmedAction, logout } from "../store/actions/AuthActions";
 
-export function signUp(email, password) {
+export function signUp(username, password) {
   //axios call
   const postData = {
-    email,
+    username,
     password,
     returnSecureToken: true,
   };
@@ -15,51 +15,41 @@ export function signUp(email, password) {
   );
 }
 
-export function login(email, password) {
+export function login(username, password) {
   const postData = {
-    email,
+    username,
     password,
-    returnSecureToken: true,
   };
-  return axios.post(
-    `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=AIzaSyD3RPAp3nuETDn9OQimqn_YF6zdzqWITII`,
-    postData
-  );
+  return axios.post(`https://test.teamq.uz/api/token/`, postData);
 }
 
 export function formatError(errorResponse) {
-  switch (errorResponse.error.message) {
-    case "EMAIL_EXISTS":
-      //return 'Email already exists';
-      swal("Oops", "Email already exists", "error");
-      break;
-    case "EMAIL_NOT_FOUND":
-      //return 'Email not found';
-      swal("Oops", "Email not found", "error", { button: "Try Again!" });
-      break;
-    case "INVALID_PASSWORD":
-      //return 'Invalid Password';
-      swal("Oops", "Invalid Password", "error", { button: "Try Again!" });
-      break;
-    case "USER_DISABLED":
-      return "User Disabled";
-
-    default:
-      return "";
+  if (!errorResponse || !errorResponse.data || !errorResponse.data.error) {
+    return "Unknown error occurred";
   }
+
+  const message = errorResponse.data.error.message;
+  swal("Oops", message, "error");
+  return message; // Always return a string that can be handled by the Redux action.
 }
 
 export function saveTokenInLocalStorage(tokenDetails) {
-  tokenDetails.expireDate = new Date(
-    new Date().getTime() + tokenDetails.expiresIn * 1000
-  );
-  localStorage.setItem("userDetails", JSON.stringify(tokenDetails));
+  const expiresIn = tokenDetails.expiresIn || 3600; // default to 1 hour if not provided
+  const expireDate = new Date(new Date().getTime() + expiresIn * 1000);
+  console.log(tokenDetails);
+  const detailsToStore = {
+    accessToken: tokenDetails.access,
+    refreshToken: tokenDetails.refresh,
+    expireDate: expireDate,
+  };
+
+  localStorage.setItem("userDetails", JSON.stringify(detailsToStore));
 }
 
 export function runLogoutTimer(dispatch, timer, history) {
   setTimeout(() => {
     dispatch(logout(history));
-  }, timer);
+  }, timer || 3600000); // Default to 1 hour if expiresIn is undefined
 }
 
 export function checkAutoLogin(dispatch, history) {

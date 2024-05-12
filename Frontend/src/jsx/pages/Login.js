@@ -11,10 +11,10 @@ import logo from "../../images/plain2do.png";
 import loginbg from "../../images/bg-login.jpg";
 
 function Login(props) {
-  const [email, setEmail] = useState("demo@example.com");
-  let errorsObj = { email: "", password: "" };
+  const [username, setUsername] = useState("admin");
+  const [password, setPassword] = useState("admin123");
+  let errorsObj = { username: "", password: "" };
   const [errors, setErrors] = useState(errorsObj);
-  const [password, setPassword] = useState("123456");
 
   const dispatch = useDispatch();
 
@@ -22,8 +22,8 @@ function Login(props) {
     e.preventDefault();
     let error = false;
     const errorObj = { ...errorsObj };
-    if (email === "") {
-      errorObj.email = "Email is Required";
+    if (username === "") {
+      errorObj.username = "username is Required";
       error = true;
     }
     if (password === "") {
@@ -35,7 +35,7 @@ function Login(props) {
       return;
     }
     dispatch(loadingToggleAction(true));
-    dispatch(loginAction(email, password, props.history));
+    dispatch(loginAction(username, password, props.history));
   }
 
   return (
@@ -102,17 +102,17 @@ function Login(props) {
                       <form onSubmit={onLogin}>
                         <div className="form-group">
                           <label className="mb-2 ">
-                            <strong>Email</strong>
+                            <strong>username</strong>
                           </label>
                           <input
                             className="form-control"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Type Your Email Address"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                            placeholder="Type Your username Address"
                           />
-                          {errors.email && (
+                          {errors.username && (
                             <div className="text-danger fs-12">
-                              {errors.email}
+                              {errors.username}
                             </div>
                           )}
                         </div>

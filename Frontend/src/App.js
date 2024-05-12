@@ -21,6 +21,7 @@ const Login = lazy(() => {
 });
 
 function App(props) {
+  const tokenLocal = localStorage.getItem("userDetails");
   const dispatch = useDispatch();
   useEffect(() => {
     checkAutoLogin(dispatch, props.history);
@@ -33,7 +34,7 @@ function App(props) {
       <Route path="/page-forgot-password" component={ForgotPassword} />
     </Switch>
   );
-  if (props.isAuthenticated) {
+  if (tokenLocal) {
     return (
       <>
         <Suspense
@@ -72,10 +73,4 @@ function App(props) {
   }
 }
 
-const mapStateToProps = (state) => {
-  return {
-    isAuthenticated: isAuthenticated(state),
-  };
-};
-
-export default withRouter(connect(mapStateToProps)(App));
+export default withRouter(connect()(App));
