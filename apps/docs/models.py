@@ -7,12 +7,13 @@ import hrm_app.settings as sett
 from apps.corecode.models import Citizenship, DocumentType
 from apps.employees.models import Employee
 
+
 # Create your models here.
 
 class Doc(models.Model):
     STATUS_CHOICES = [("active", "Действующий"), ("inactive", "Архив")]
 
-    #GENDER_CHOICES = [("male", "Муж"), ("female", "Жен")]
+    # GENDER_CHOICES = [("male", "Муж"), ("female", "Жен")]
 
     current_status = models.CharField(
         max_length=10, choices=STATUS_CHOICES, default="active", verbose_name="Статус"
@@ -26,10 +27,10 @@ class Doc(models.Model):
         DocumentType, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Тип документа"
     )
 
-    serial = models.CharField(max_length=200, verbose_name="Серия") # unique=True, 
+    serial = models.CharField(max_length=200, verbose_name="Серия")  # unique=True,
     number = models.CharField(max_length=200, verbose_name="Номер №")
 
-    date_of_issue = models.DateField(default=timezone.now,  verbose_name="Дата выдачи")
+    date_of_issue = models.DateField(default=timezone.now, verbose_name="Дата выдачи")
     date_of_preparing = models.DateField(default=timezone.now, verbose_name="Начать оформить до")
     date_of_expiry = models.DateField(default=timezone.now, verbose_name="Действует до")
 
@@ -47,6 +48,7 @@ class Doc(models.Model):
 
     def get_absolute_url(self):
         return reverse("doc-detail", kwargs={"pk": self.pk})
+
 
 class DocBulkUpload(models.Model):
     date_uploaded = models.DateTimeField(auto_now=True)

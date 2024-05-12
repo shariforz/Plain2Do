@@ -87,3 +87,6 @@ urlpatterns = [
     path('client/<int:pk>/', Gen_DT_ClientAPIView.as_view(), name='client_one'),
     path('client/', Gen_DT_ClientAPIView.as_view(), name='client'),
 ]
+
+for i in [1, 2]:
+    s = 'hi'

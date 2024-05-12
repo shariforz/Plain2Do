@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from .serializers import *
 from rest_framework.response import Response
@@ -7,6 +8,8 @@ from rest_framework.renderers import JSONRenderer
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
+import xlwt
+from rest_framework.pagination import PageNumberPagination
 
 
 class SiteConfigAPIView(APIView):
@@ -100,7 +103,7 @@ class PermitDocCategoryAPIView(APIView):
         operation_id='PermitDocCat_post'
     )
     def post(self, request, *args, **kwargs):
-        serializer = PermitDocCategorySerializer(request.data)
+        serializer = PermitDocCategorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
@@ -845,7 +848,8 @@ class Gen_DT_SubjectOfRFAPIView(APIView):
 
 class Gen_DT_ProjectAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_ProjectSerializer,  # Specify the serializer for the request
@@ -858,6 +862,67 @@ class Gen_DT_ProjectAPIView(APIView):
             instance = get_object_or_404(Gen_DT_Project, pk=pk)
             serializer = Gen_DT_ProjectSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
+        elif request.GET.get('excel') == 'True':
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="projects.xls"'
+            wb = xlwt.Workbook(encoding='utf-8')
+            ws = wb.add_sheet('Projects')
+            row_num = 0
+            font_style = xlwt.XFStyle()
+            font_style.font.bold = True
+            columns = ['ProjectID_1C', 'ProjectCode', 'ProjectNameEN', 'ProjectNameRU', 'ProjectNameTR', 'SubjectofRF',
+                       'AddressEN', 'AddressRU', 'AddressTR', 'StartDate', 'EndDate']
+            for col_num in range(len(columns)):
+                ws.write(row_num, col_num, columns[col_num], font_style)
+            # Sheet body, remaining rows
+            font_style = xlwt.XFStyle()
+            rows = Gen_DT_Project.objects.all().values_list('ProjectID_1C', 'ProjectCode', 'ProjectNameEN',
+                                                            'ProjectNameRU', 'ProjectNameTR', 'SubjectofRF',
+                                                            'AddressEN', 'AddressRU', 'AddressTR', 'StartDate',
+                                                            'EndDate')
+            for row in rows:
+                row_num += 1
+                for col_num in range(len(row)):
+                    ws.write(row_num, col_num, row[col_num], font_style)
+            wb.save(response)
+            return response
+        elif request.GET.get('excel'):
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="projects.xls"'
+            ids = request.GET.get('excel').split(',')
+            wb = xlwt.Workbook(encoding='utf-8')
+            for i in ids:
+                name = Gen_DT_Project.objects.get(id=int(i))
+                ws = wb.add_sheet(str(name.id))
+                columns = ['ProjectID_1C', 'ProjectCode', 'ProjectNameEN', 'ProjectNameRU', 'ProjectNameTR',
+                           'SubjectofRF', 'AddressEN', 'AddressRU', 'AddressTR', 'StartDate', 'EndDate']
+                row_num = 0
+                font_style = xlwt.XFStyle()
+                font_style.font.bold = True
+                for col_num in range(len(columns)):
+                    ws.write(row_num, col_num, columns[col_num], font_style)
+                # Sheet body, remaining rows
+                font_style = xlwt.XFStyle()
+                rows = Gen_DT_Project.objects.filter(id=int(i)).values_list('id', 'ProjectCode', 'ProjectNameEN',
+                                                                            'ProjectNameRU', 'ProjectNameTR',
+                                                                            'SubjectofRF',
+                                                                            'AddressEN', 'AddressRU', 'AddressTR',
+                                                                            'StartDate',
+                                                                            'EndDate')
+                for row in rows:
+                    row_num += 1
+                    for col_num in range(len(row)):
+                        ws.write(row_num, col_num, row[col_num], font_style)
+            wb.save(response)
+
+            return response
+        elif request.GET.get('page') and request.GET.get('limit'):
+            paginator = PageNumberPagination()
+            queryset = Gen_DT_Project.objects.all().order_by('id')
+            paginator.page_size = request.GET.get('limit')
+            result_page = paginator.paginate_queryset(queryset, request)
+            serializer = Gen_DT_ProjectSerializer(result_page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         serializer = Gen_DT_ProjectSerializer(Gen_DT_Project.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
@@ -889,7 +954,8 @@ class Gen_DT_ProjectAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_ProjectSerializer, responses={HTTP_200_OK: Gen_DT_ProjectSerializer()}, tags=['Gen_DT_Project'],
+    @extend_schema(request=Gen_DT_ProjectSerializer, responses={HTTP_200_OK: Gen_DT_ProjectSerializer()},
+                   tags=['Gen_DT_Project'],
                    operation_id='Gen_DT_Project_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_Project, pk=pk)
@@ -902,8 +968,9 @@ class Gen_DT_CounterPartyTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_CounterPartyTypeSerializer, responses={HTTP_200_OK: Gen_DT_CounterPartyTypeSerializer()}, tags=['Gen_DT_CounterPartyType'],
-        operation_id='Gen_DT_CounterPartyType_get')
+    @extend_schema(request=Gen_DT_CounterPartyTypeSerializer,
+                   responses={HTTP_200_OK: Gen_DT_CounterPartyTypeSerializer()}, tags=['Gen_DT_CounterPartyType'],
+                   operation_id='Gen_DT_CounterPartyType_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_CounterPartyType, pk=pk)
@@ -912,8 +979,9 @@ class Gen_DT_CounterPartyTypeAPIView(APIView):
         serializer = Gen_DT_CounterPartyTypeSerializer(Gen_DT_CounterPartyType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=SiteConfigSerializer, responses={HTTP_201_CREATED: Gen_DT_CounterPartyTypeSerializer()}, tags=['Gen_DT_CounterPartyType'],
-        operation_id='Gen_DT_CounterPartyType_post')
+    @extend_schema(request=SiteConfigSerializer, responses={HTTP_201_CREATED: Gen_DT_CounterPartyTypeSerializer()},
+                   tags=['Gen_DT_CounterPartyType'],
+                   operation_id='Gen_DT_CounterPartyType_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_CounterPartyTypeSerializer(data=request.data)
         if serializer.is_valid():
@@ -922,8 +990,9 @@ class Gen_DT_CounterPartyTypeAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=SiteConfigSerializer, responses={HTTP_200_OK: Gen_DT_CounterPartyTypeSerializer()}, tags=['Gen_DT_CounterPartyType'],
-        operation_id='Gen_DT_CounterPartyType_put')
+    @extend_schema(request=SiteConfigSerializer, responses={HTTP_200_OK: Gen_DT_CounterPartyTypeSerializer()},
+                   tags=['Gen_DT_CounterPartyType'],
+                   operation_id='Gen_DT_CounterPartyType_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_CounterPartyType, pk=pk)
         serializer = Gen_DT_CounterPartyTypeSerializer(instance=instance, data=request.data, partial=True)
@@ -932,8 +1001,9 @@ class Gen_DT_CounterPartyTypeAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=SiteConfigSerializer, responses={HTTP_200_OK: Gen_DT_CounterPartyTypeSerializer()}, tags=['Gen_DT_CounterPartyType'],
-        operation_id='Gen_DT_CounterPartyType_delete')
+    @extend_schema(request=SiteConfigSerializer, responses={HTTP_200_OK: Gen_DT_CounterPartyTypeSerializer()},
+                   tags=['Gen_DT_CounterPartyType'],
+                   operation_id='Gen_DT_CounterPartyType_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_CounterPartyType, pk=pk)
         obj.delete()
@@ -945,8 +1015,9 @@ class Gen_DT_ContractTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_200_OK: Gen_DT_ContractTypeSerializer()}, tags=['Gen_DT_ContractType'],
-        operation_id='Gen_DT_ContractType_get')
+    @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_200_OK: Gen_DT_ContractTypeSerializer()},
+                   tags=['Gen_DT_ContractType'],
+                   operation_id='Gen_DT_ContractType_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_ContractType, pk=pk)
@@ -955,8 +1026,9 @@ class Gen_DT_ContractTypeAPIView(APIView):
         serializer = Gen_DT_ContractTypeSerializer(Gen_DT_ContractType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_ContractTypeSerializer()}, tags=['Gen_DT_ContractType'],
-        operation_id='Gen_DT_ContractType_post')
+    @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_ContractTypeSerializer()},
+                   tags=['Gen_DT_ContractType'],
+                   operation_id='Gen_DT_ContractType_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_ContractTypeSerializer(data=request.data)
         if serializer.is_valid():
@@ -965,8 +1037,9 @@ class Gen_DT_ContractTypeAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_200_OK: Gen_DT_ContractTypeSerializer()}, tags=['Gen_DT_ContractType'],
-        operation_id='Gen_DT_ContractType_put')
+    @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_200_OK: Gen_DT_ContractTypeSerializer()},
+                   tags=['Gen_DT_ContractType'],
+                   operation_id='Gen_DT_ContractType_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_ContractType, pk=pk)
         serializer = Gen_DT_ContractTypeSerializer(instance=instance, data=request.data, partial=True)
@@ -975,8 +1048,9 @@ class Gen_DT_ContractTypeAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_200_OK: Gen_DT_ContractTypeSerializer()}, tags=['Gen_DT_ContractType'],
-        operation_id='Gen_DT_ContractType_delete')
+    @extend_schema(request=Gen_DT_ContractTypeSerializer, responses={HTTP_200_OK: Gen_DT_ContractTypeSerializer()},
+                   tags=['Gen_DT_ContractType'],
+                   operation_id='Gen_DT_ContractType_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_ContractType, pk=pk)
         obj.delete()
@@ -988,8 +1062,9 @@ class Gen_DT_VAT_RateAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_200_OK: Gen_DT_VAT_RateSerializer()}, tags=['Gen_DT_VAT_Rate'],
-        operation_id='Gen_DT_VAT_Rate_get')
+    @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_200_OK: Gen_DT_VAT_RateSerializer()},
+                   tags=['Gen_DT_VAT_Rate'],
+                   operation_id='Gen_DT_VAT_Rate_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_VAT_Rate, pk=pk)
@@ -998,8 +1073,9 @@ class Gen_DT_VAT_RateAPIView(APIView):
         serializer = Gen_DT_VAT_RateSerializer(Gen_DT_VAT_Rate.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_201_CREATED: Gen_DT_VAT_RateSerializer()}, tags=['Gen_DT_VAT_Rate'],
-        operation_id='Gen_DT_VAT_Rate_post')
+    @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_201_CREATED: Gen_DT_VAT_RateSerializer()},
+                   tags=['Gen_DT_VAT_Rate'],
+                   operation_id='Gen_DT_VAT_Rate_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_VAT_RateSerializer(data=request.data)
         if serializer.is_valid():
@@ -1008,8 +1084,9 @@ class Gen_DT_VAT_RateAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_200_OK: Gen_DT_VAT_RateSerializer()}, tags=['Gen_DT_VAT_Rate'],
-        operation_id='Gen_DT_VAT_Rate_put')
+    @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_200_OK: Gen_DT_VAT_RateSerializer()},
+                   tags=['Gen_DT_VAT_Rate'],
+                   operation_id='Gen_DT_VAT_Rate_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_VAT_Rate, pk=pk)
         serializer = Gen_DT_VAT_RateSerializer(instance=instance, data=request.data, partial=True)
@@ -1018,8 +1095,9 @@ class Gen_DT_VAT_RateAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_200_OK: Gen_DT_VAT_RateSerializer()}, tags=['Gen_DT_VAT_Rate'],
-        operation_id='Gen_DT_VAT_Rate_delete')
+    @extend_schema(request=Gen_DT_VAT_RateSerializer, responses={HTTP_200_OK: Gen_DT_VAT_RateSerializer()},
+                   tags=['Gen_DT_VAT_Rate'],
+                   operation_id='Gen_DT_VAT_Rate_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_VAT_Rate, pk=pk)
         obj.delete()
@@ -1032,7 +1110,7 @@ class Gen_DT_UoMAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_200_OK: Gen_DT_UoMSerializer()}, tags=['Gen_DT_UoM'],
-        operation_id='Gen_DT_UoM_get')
+                   operation_id='Gen_DT_UoM_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_UoM, pk=pk)
@@ -1041,8 +1119,9 @@ class Gen_DT_UoMAPIView(APIView):
         serializer = Gen_DT_UoMSerializer(Gen_DT_UoM.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_201_CREATED: Gen_DT_UoMSerializer()}, tags=['Gen_DT_UoM'],
-        operation_id='Gen_DT_UoM_post')
+    @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_201_CREATED: Gen_DT_UoMSerializer()},
+                   tags=['Gen_DT_UoM'],
+                   operation_id='Gen_DT_UoM_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_UoMSerializer(data=request.data)
         if serializer.is_valid():
@@ -1052,7 +1131,7 @@ class Gen_DT_UoMAPIView(APIView):
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_200_OK: Gen_DT_UoMSerializer()}, tags=['Gen_DT_UoM'],
-        operation_id='Gen_DT_UoM_put')
+                   operation_id='Gen_DT_UoM_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_UoM, pk=pk)
         serializer = Gen_DT_UoMSerializer(instance=instance, data=request.data, partial=True)
@@ -1062,7 +1141,7 @@ class Gen_DT_UoMAPIView(APIView):
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
     @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_200_OK: Gen_DT_UoMSerializer()}, tags=['Gen_DT_UoM'],
-        operation_id='Gen_DT_UoM_delete')
+                   operation_id='Gen_DT_UoM_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_UoM, pk=pk)
         obj.delete()
@@ -1072,20 +1151,80 @@ class Gen_DT_UoMAPIView(APIView):
 
 class Gen_DT_BudgetDataAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()}, tags=['Gen_DT_BudgetData'],
-        operation_id='Gen_DT_BudgetData_get')
+    @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()},
+                   tags=['Gen_DT_BudgetData'],
+                   operation_id='Gen_DT_BudgetData_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_BudgetData, pk=pk)
             serializer = Gen_DT_BudgetDataSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
+        elif request.GET.get('excel') == 'True':
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="BudgetData.xls"'
+            wb = xlwt.Workbook(encoding='utf-8')
+            ws = wb.add_sheet('BudgetData')
+            row_num = 0
+            font_style = xlwt.XFStyle()
+            font_style.font.bold = True
+            columns = ['BudgetVersion', 'Discipline', 'BudgetCode', 'PrimaveraCode', 'JotTitle', 'LegDocumentType',
+                       'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate', 'EmpQty', 'EmpNetSalary']
+            for col_num in range(len(columns)):
+                ws.write(row_num, col_num, columns[col_num], font_style)
+            # Sheet body, remaining rows
+            font_style = xlwt.XFStyle()
+            rows = Gen_DT_BudgetData.objects.all().values_list('BudgetVersion', 'Discipline', 'BudgetCode',
+                                                               'PrimaveraCode', 'JotTitle', 'LegDocumentType',
+                                                               'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate',
+                                                               'EmpQty', 'EmpNetSalary')
+            for row in rows:
+                row_num += 1
+                for col_num in range(len(row)):
+                    ws.write(row_num, col_num, row[col_num], font_style)
+            wb.save(response)
+            return response
+        elif request.GET.get('excel'):
+            ids = request.GET.get('excel').split(',')
+            IDS = list(map(int, ids))
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="BudgetData.xls"'
+            wb = xlwt.Workbook(encoding='utf-8')
+            ws = wb.add_sheet('BudgetData')
+            row_num = 0
+            font_style = xlwt.XFStyle()
+            font_style.font.bold = True
+            columns = ['BudgetVersion', 'Discipline', 'BudgetCode', 'PrimaveraCode', 'JotTitle', 'LegDocumentType',
+                       'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate', 'EmpQty', 'EmpNetSalary']
+            for col_num in range(len(columns)):
+                ws.write(row_num, col_num, columns[col_num], font_style)
+            # Sheet body, remaining rows
+            font_style = xlwt.XFStyle()
+            rows = Gen_DT_BudgetData.objects.filter(id__in=IDS).values_list('BudgetVersion', 'Discipline', 'BudgetCode',
+                                                               'PrimaveraCode', 'JotTitle', 'LegDocumentType',
+                                                               'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate',
+                                                               'EmpQty', 'EmpNetSalary')
+            for row in rows:
+                row_num += 1
+                for col_num in range(len(row)):
+                    ws.write(row_num, col_num, row[col_num], font_style)
+            wb.save(response)
+            return response
+        elif request.GET.get('limit') and request.GET.get('offset'):
+            paginator = PageNumberPagination()
+            paginator.page_size = request.GET.get('limit')
+            paginator.page = request.GET.get('offset')
+            queryset = Gen_DT_BudgetData.objects.all().order_by('id')
+            result_page = paginator.paginate_queryset(queryset, request)
+            serializer = Gen_DT_BudgetDataSerializer(result_page, many=True)
+            return paginator.get_paginated_response(serializer.data)
         serializer = Gen_DT_BudgetDataSerializer(Gen_DT_BudgetData.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_201_CREATED: Gen_DT_BudgetDataSerializer()}, tags=['Gen_DT_BudgetData'],
-        operation_id='Gen_DT_BudgetData_post')
+    @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_201_CREATED: Gen_DT_BudgetDataSerializer()},
+                   tags=['Gen_DT_BudgetData'],
+                   operation_id='Gen_DT_BudgetData_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_BudgetDataSerializer(data=request.data)
         if serializer.is_valid():
@@ -1094,8 +1233,9 @@ class Gen_DT_BudgetDataAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()}, tags=['Gen_DT_BudgetData'],
-        operation_id='Gen_DT_BudgetData_put')
+    @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()},
+                   tags=['Gen_DT_BudgetData'],
+                   operation_id='Gen_DT_BudgetData_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_BudgetData, pk=pk)
         serializer = Gen_DT_BudgetDataSerializer(instance=instance, data=request.data, partial=True)
@@ -1104,8 +1244,9 @@ class Gen_DT_BudgetDataAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()}, tags=['Gen_DT_BudgetData'],
-        operation_id='Gen_DT_BudgetData_delete')
+    @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()},
+                   tags=['Gen_DT_BudgetData'],
+                   operation_id='Gen_DT_BudgetData_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_BudgetData, pk=pk)
         obj.delete()
@@ -1117,27 +1258,33 @@ class Gen_DT_BudgetDataHistoryAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_BudgetDataHistorySerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'],
-        operation_id='Gen_DT_BudgetDataHistory_get')
+    @extend_schema(request=Gen_DT_BudgetDataHistorySerializer,
+                   responses={HTTP_200_OK: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'],
+                   operation_id='Gen_DT_BudgetDataHistory_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_BudgetDataHistory, pk=pk)
             serializer = Gen_DT_BudgetDataHistorySerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_BudgetDataHistorySerializer(Gen_DT_BudgetDataHistory.objects.all().order_by('id'), many=True)
+        serializer = Gen_DT_BudgetDataHistorySerializer(Gen_DT_BudgetDataHistory.objects.all().order_by('id'),
+                                                        many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_BudgetDataHistorySerializer, responses={HTTP_201_CREATED: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'],
-        operation_id='Gen_DT_BudgetDataHistory_post')
+    @extend_schema(request=Gen_DT_BudgetDataHistorySerializer,
+                   responses={HTTP_201_CREATED: Gen_DT_BudgetDataHistorySerializer()},
+                   tags=['Gen_DT_BudgetDataHistory'],
+                   operation_id='Gen_DT_BudgetDataHistory_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_BudgetDataHistorySerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED, content_type='application/json')
+            return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
+                            content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_BudgetDataHistorySerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'],
-        operation_id='Gen_DT_BudgetDataHistory_put')
+    @extend_schema(request=Gen_DT_BudgetDataHistorySerializer,
+                   responses={HTTP_200_OK: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'],
+                   operation_id='Gen_DT_BudgetDataHistory_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_BudgetDataHistory, pk=pk)
         serializer = Gen_DT_BudgetDataHistorySerializer(instance=instance, data=request.data, partial=True)
@@ -1146,8 +1293,9 @@ class Gen_DT_BudgetDataHistoryAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_BudgetDataHistorySerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'],
-        operation_id='Gen_DT_BudgetDataHistory_delete')
+    @extend_schema(request=Gen_DT_BudgetDataHistorySerializer,
+                   responses={HTTP_200_OK: Gen_DT_BudgetDataHistorySerializer()}, tags=['Gen_DT_BudgetDataHistory'],
+                   operation_id='Gen_DT_BudgetDataHistory_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_BudgetDataHistory, pk=pk)
         obj.delete()
@@ -1159,8 +1307,9 @@ class Gen_DT_ExpenseFrequencyAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_ExpenseFrequencySerializer, responses={HTTP_200_OK: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
-        operation_id='Gen_DT_ExpenseFrequency_get')
+    @extend_schema(request=Gen_DT_ExpenseFrequencySerializer,
+                   responses={HTTP_200_OK: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
+                   operation_id='Gen_DT_ExpenseFrequency_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_ExpenseFrequency, pk=pk)
@@ -1169,8 +1318,9 @@ class Gen_DT_ExpenseFrequencyAPIView(APIView):
         serializer = Gen_DT_ExpenseFrequencySerializer(Gen_DT_ExpenseFrequency.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_ExpenseFrequencySerializer, responses={HTTP_201_CREATED: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
-        operation_id='Gen_DT_ExpenseFrequency_post')
+    @extend_schema(request=Gen_DT_ExpenseFrequencySerializer,
+                   responses={HTTP_201_CREATED: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
+                   operation_id='Gen_DT_ExpenseFrequency_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_ExpenseFrequencySerializer(data=request.data)
         if serializer.is_valid():
@@ -1179,8 +1329,9 @@ class Gen_DT_ExpenseFrequencyAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_ExpenseFrequencySerializer, responses={HTTP_200_OK: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
-        operation_id='Gen_DT_ExpenseFrequency_put')
+    @extend_schema(request=Gen_DT_ExpenseFrequencySerializer,
+                   responses={HTTP_200_OK: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
+                   operation_id='Gen_DT_ExpenseFrequency_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_ExpenseFrequency, pk=pk)
         serializer = Gen_DT_ExpenseFrequencySerializer(instance=instance, data=request.data, partial=True)
@@ -1189,8 +1340,9 @@ class Gen_DT_ExpenseFrequencyAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_ExpenseFrequencySerializer, responses={HTTP_200_OK: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
-        operation_id='Gen_DT_ExpenseFrequency_delete')
+    @extend_schema(request=Gen_DT_ExpenseFrequencySerializer,
+                   responses={HTTP_200_OK: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
+                   operation_id='Gen_DT_ExpenseFrequency_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_ExpenseFrequency, pk=pk)
         obj.delete()
@@ -1202,8 +1354,9 @@ class Gen_DT_ExpenseTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()}, tags=['Gen_DT_ExpenseType'],
-        operation_id='Gen_DT_ExpenseType_get')
+    @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()},
+                   tags=['Gen_DT_ExpenseType'],
+                   operation_id='Gen_DT_ExpenseType_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_ExpenseType, pk=pk)
@@ -1212,8 +1365,9 @@ class Gen_DT_ExpenseTypeAPIView(APIView):
         serializer = Gen_DT_ExpenseTypeSerializer(Gen_DT_ExpenseType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_ExpenseTypeSerializer()}, tags=['Gen_DT_ExpenseType'],
-        operation_id='Gen_DT_ExpenseType_post')
+    @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_ExpenseTypeSerializer()},
+                   tags=['Gen_DT_ExpenseType'],
+                   operation_id='Gen_DT_ExpenseType_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_ExpenseTypeSerializer(data=request.data)
         if serializer.is_valid():
@@ -1222,8 +1376,9 @@ class Gen_DT_ExpenseTypeAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()}, tags=['Gen_DT_ExpenseType'],
-        operation_id='Gen_DT_ExpenseType_put')
+    @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()},
+                   tags=['Gen_DT_ExpenseType'],
+                   operation_id='Gen_DT_ExpenseType_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_ExpenseType, pk=pk)
         serializer = Gen_DT_ExpenseTypeSerializer(instance=instance, data=request.data, partial=True)
@@ -1232,8 +1387,9 @@ class Gen_DT_ExpenseTypeAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()}, tags=['Gen_DT_ExpenseType'],
-        operation_id='Gen_DT_ExpenseType_delete')
+    @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()},
+                   tags=['Gen_DT_ExpenseType'],
+                   operation_id='Gen_DT_ExpenseType_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_ExpenseType, pk=pk)
         obj.delete()
@@ -1245,8 +1401,9 @@ class Gen_DT_LegalExpencesAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()}, tags=['Gen_DT_LegalExpences'],
-        operation_id='Gen_DT_LegalExpences_get')
+    @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()},
+                   tags=['Gen_DT_LegalExpences'],
+                   operation_id='Gen_DT_LegalExpences_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_LegalExpences, pk=pk)
@@ -1255,8 +1412,9 @@ class Gen_DT_LegalExpencesAPIView(APIView):
         serializer = Gen_DT_LegalExpencesSerializer(Gen_DT_LegalExpences.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_201_CREATED: Gen_DT_LegalExpencesSerializer()}, tags=['Gen_DT_LegalExpences'],
-        operation_id='Gen_DT_LegalExpences_post')
+    @extend_schema(request=Gen_DT_LegalExpencesSerializer,
+                   responses={HTTP_201_CREATED: Gen_DT_LegalExpencesSerializer()}, tags=['Gen_DT_LegalExpences'],
+                   operation_id='Gen_DT_LegalExpences_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_LegalExpencesSerializer(data=request.data)
         if serializer.is_valid():
@@ -1265,8 +1423,9 @@ class Gen_DT_LegalExpencesAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()}, tags=['Gen_DT_LegalExpences'],
-        operation_id='Gen_DT_LegalExpences_put')
+    @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()},
+                   tags=['Gen_DT_LegalExpences'],
+                   operation_id='Gen_DT_LegalExpences_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_LegalExpences, pk=pk)
         serializer = Gen_DT_LegalExpencesSerializer(instance=instance, data=request.data, partial=True)
@@ -1275,8 +1434,9 @@ class Gen_DT_LegalExpencesAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()}, tags=['Gen_DT_LegalExpences'],
-        operation_id='Gen_DT_LegalExpences_delete')
+    @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()},
+                   tags=['Gen_DT_LegalExpences'],
+                   operation_id='Gen_DT_LegalExpences_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_LegalExpences, pk=pk)
         obj.delete()
@@ -1288,8 +1448,9 @@ class Gen_DT_EmpLegalStatusAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()}, tags=['Gen_DT_EmpLegalStatus'],
-        operation_id='Gen_DT_EmpLegalStatus_get')
+    @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()},
+                   tags=['Gen_DT_EmpLegalStatus'],
+                   operation_id='Gen_DT_EmpLegalStatus_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_EmpLegalStatus, pk=pk)
@@ -1298,8 +1459,9 @@ class Gen_DT_EmpLegalStatusAPIView(APIView):
         serializer = Gen_DT_EmpLegalStatusSerializer(Gen_DT_EmpLegalStatus.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpLegalStatusSerializer()}, tags=['Gen_DT_EmpLegalStatus'],
-        operation_id='Gen_DT_EmpLegalStatus_post')
+    @extend_schema(request=Gen_DT_EmpLegalStatusSerializer,
+                   responses={HTTP_201_CREATED: Gen_DT_EmpLegalStatusSerializer()}, tags=['Gen_DT_EmpLegalStatus'],
+                   operation_id='Gen_DT_EmpLegalStatus_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_EmpLegalStatusSerializer(data=request.data)
         if serializer.is_valid():
@@ -1308,8 +1470,9 @@ class Gen_DT_EmpLegalStatusAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()}, tags=['Gen_DT_EmpLegalStatus'],
-        operation_id='Gen_DT_EmpLegalStatus_put')
+    @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()},
+                   tags=['Gen_DT_EmpLegalStatus'],
+                   operation_id='Gen_DT_EmpLegalStatus_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_EmpLegalStatus, pk=pk)
         serializer = Gen_DT_EmpLegalStatusSerializer(instance=instance, data=request.data, partial=True)
@@ -1318,8 +1481,9 @@ class Gen_DT_EmpLegalStatusAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()}, tags=['Gen_DT_EmpLegalStatus'],
-        operation_id='Gen_DT_EmpLegalStatus_delete')
+    @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()},
+                   tags=['Gen_DT_EmpLegalStatus'],
+                   operation_id='Gen_DT_EmpLegalStatus_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_EmpLegalStatus, pk=pk)
         obj.delete()
@@ -1331,8 +1495,9 @@ class Gen_DT_EmpTaxTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxTypeSerializer()}, tags=['Gen_DT_EmpTaxType'],
-        operation_id='Gen_DT_EmpTaxType_get')
+    @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxTypeSerializer()},
+                   tags=['Gen_DT_EmpTaxType'],
+                   operation_id='Gen_DT_EmpTaxType_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_EmpTaxType, pk=pk)
@@ -1341,8 +1506,9 @@ class Gen_DT_EmpTaxTypeAPIView(APIView):
         serializer = Gen_DT_EmpTaxTypeSerializer(Gen_DT_EmpTaxType.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxTypeSerializer()}, tags=['Gen_DT_EmpTaxType'],
-        operation_id='Gen_DT_EmpTaxType_post')
+    @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxTypeSerializer()},
+                   tags=['Gen_DT_EmpTaxType'],
+                   operation_id='Gen_DT_EmpTaxType_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_EmpTaxTypeSerializer(data=request.data)
         if serializer.is_valid():
@@ -1351,8 +1517,9 @@ class Gen_DT_EmpTaxTypeAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxTypeSerializer()}, tags=['Gen_DT_EmpTaxType'],
-        operation_id='Gen_DT_EmpTaxType_put')
+    @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxTypeSerializer()},
+                   tags=['Gen_DT_EmpTaxType'],
+                   operation_id='Gen_DT_EmpTaxType_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_EmpTaxType, pk=pk)
         serializer = Gen_DT_EmpTaxTypeSerializer(instance=instance, data=request.data, partial=True)
@@ -1361,8 +1528,9 @@ class Gen_DT_EmpTaxTypeAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxTypeSerializer()}, tags=['Gen_DT_EmpTaxType'],
-        operation_id='Gen_DT_EmpTaxType_delete')
+    @extend_schema(request=Gen_DT_EmpTaxTypeSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxTypeSerializer()},
+                   tags=['Gen_DT_EmpTaxType'],
+                   operation_id='Gen_DT_EmpTaxType_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_EmpTaxType, pk=pk)
         obj.delete()
@@ -1374,8 +1542,9 @@ class Gen_DT_EmpTaxPayerAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxPayerSerializer()}, tags=['Gen_DT_EmpTaxPayer'],
-        operation_id='Gen_DT_EmpTaxPayer_get')
+    @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxPayerSerializer()},
+                   tags=['Gen_DT_EmpTaxPayer'],
+                   operation_id='Gen_DT_EmpTaxPayer_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_EmpTaxPayer, pk=pk)
@@ -1384,8 +1553,9 @@ class Gen_DT_EmpTaxPayerAPIView(APIView):
         serializer = Gen_DT_EmpTaxPayerSerializer(Gen_DT_EmpTaxPayer.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxPayerSerializer()}, tags=['Gen_DT_EmpTaxPayer'],
-        operation_id='Gen_DT_EmpTaxPayer_post')
+    @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxPayerSerializer()},
+                   tags=['Gen_DT_EmpTaxPayer'],
+                   operation_id='Gen_DT_EmpTaxPayer_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_EmpTaxPayerSerializer(data=request.data)
         if serializer.is_valid():
@@ -1394,8 +1564,9 @@ class Gen_DT_EmpTaxPayerAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxPayerSerializer()}, tags=['Gen_DT_EmpTaxPayer'],
-        operation_id='Gen_DT_EmpTaxPayer_put')
+    @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxPayerSerializer()},
+                   tags=['Gen_DT_EmpTaxPayer'],
+                   operation_id='Gen_DT_EmpTaxPayer_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_EmpTaxPayer, pk=pk)
         serializer = Gen_DT_EmpTaxPayerSerializer(instance=instance, data=request.data, partial=True)
@@ -1404,8 +1575,9 @@ class Gen_DT_EmpTaxPayerAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxPayerSerializer()}, tags=['Gen_DT_EmpTaxPayer'],
-        operation_id='Gen_DT_EmpTaxPayer_delete')
+    @extend_schema(request=Gen_DT_EmpTaxPayerSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxPayerSerializer()},
+                   tags=['Gen_DT_EmpTaxPayer'],
+                   operation_id='Gen_DT_EmpTaxPayer_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_EmpTaxPayer, pk=pk)
         obj.delete()
@@ -1417,8 +1589,9 @@ class Gen_DT_OurCompanyAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()}, tags=['Gen_DT_OurCompany'],
-        operation_id='Gen_DT_OurCompany_get')
+    @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()},
+                   tags=['Gen_DT_OurCompany'],
+                   operation_id='Gen_DT_OurCompany_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_OurCompany, pk=pk)
@@ -1427,8 +1600,9 @@ class Gen_DT_OurCompanyAPIView(APIView):
         serializer = Gen_DT_OurCompanySerializer(Gen_DT_OurCompany.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()}, tags=['Gen_DT_OurCompany'],
-        operation_id='Gen_DT_OurCompany_post')
+    @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()},
+                   tags=['Gen_DT_OurCompany'],
+                   operation_id='Gen_DT_OurCompany_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_OurCompanySerializer(data=request.data)
         if serializer.is_valid():
@@ -1437,8 +1611,9 @@ class Gen_DT_OurCompanyAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()}, tags=['Gen_DT_OurCompany'],
-        operation_id='Gen_DT_OurCompany_put')
+    @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()},
+                   tags=['Gen_DT_OurCompany'],
+                   operation_id='Gen_DT_OurCompany_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_OurCompany, pk=pk)
         serializer = Gen_DT_OurCompanySerializer(instance=instance, data=request.data, partial=True)
@@ -1447,8 +1622,9 @@ class Gen_DT_OurCompanyAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()}, tags=['Gen_DT_OurCompany'],
-        operation_id='Gen_DT_OurCompany_delete')
+    @extend_schema(request=Gen_DT_OurCompanySerializer, responses={HTTP_200_OK: Gen_DT_OurCompanySerializer()},
+                   tags=['Gen_DT_OurCompany'],
+                   operation_id='Gen_DT_OurCompany_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_OurCompany, pk=pk)
         obj.delete()
@@ -1460,8 +1636,9 @@ class Gen_DT_ContractAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_200_OK: Gen_DT_ContractSerializer()}, tags=['Gen_DT_Contract'],
-        operation_id='Gen_DT_Contract_get')
+    @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_200_OK: Gen_DT_ContractSerializer()},
+                   tags=['Gen_DT_Contract'],
+                   operation_id='Gen_DT_Contract_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_Contract, pk=pk)
@@ -1470,8 +1647,9 @@ class Gen_DT_ContractAPIView(APIView):
         serializer = Gen_DT_ContractSerializer(Gen_DT_Contract.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_201_CREATED: Gen_DT_ContractSerializer()}, tags=['Gen_DT_Contract'],
-        operation_id='Gen_DT_Contract_post')
+    @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_201_CREATED: Gen_DT_ContractSerializer()},
+                   tags=['Gen_DT_Contract'],
+                   operation_id='Gen_DT_Contract_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_ContractSerializer(data=request.data)
         if serializer.is_valid():
@@ -1480,8 +1658,9 @@ class Gen_DT_ContractAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_200_OK: Gen_DT_ContractSerializer()}, tags=['Gen_DT_Contract'],
-        operation_id='Gen_DT_Contract_put')
+    @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_200_OK: Gen_DT_ContractSerializer()},
+                   tags=['Gen_DT_Contract'],
+                   operation_id='Gen_DT_Contract_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_Contract, pk=pk)
         serializer = Gen_DT_ContractSerializer(instance=instance, data=request.data, partial=True)
@@ -1490,8 +1669,9 @@ class Gen_DT_ContractAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_200_OK: Gen_DT_ContractSerializer()}, tags=['Gen_DT_Contract'],
-        operation_id='Gen_DT_Contract_delete')
+    @extend_schema(request=Gen_DT_ContractSerializer, responses={HTTP_200_OK: Gen_DT_ContractSerializer()},
+                   tags=['Gen_DT_Contract'],
+                   operation_id='Gen_DT_Contract_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_Contract, pk=pk)
         obj.delete()
@@ -1503,8 +1683,9 @@ class Gen_DT_EmpTaxCalcAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxCalcSerializer()}, tags=['Gen_DT_EmpTaxCalc'],
-        operation_id='Gen_DT_EmpTaxCalc_get')
+    @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxCalcSerializer()},
+                   tags=['Gen_DT_EmpTaxCalc'],
+                   operation_id='Gen_DT_EmpTaxCalc_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_EmpTaxCalc, pk=pk)
@@ -1513,8 +1694,9 @@ class Gen_DT_EmpTaxCalcAPIView(APIView):
         serializer = Gen_DT_EmpTaxCalcSerializer(Gen_DT_EmpTaxCalc.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxCalcSerializer()}, tags=['Gen_DT_EmpTaxCalc'],
-        operation_id='Gen_DT_EmpTaxCalc_post')
+    @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_201_CREATED: Gen_DT_EmpTaxCalcSerializer()},
+                   tags=['Gen_DT_EmpTaxCalc'],
+                   operation_id='Gen_DT_EmpTaxCalc_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_EmpTaxCalcSerializer(data=request.data)
         if serializer.is_valid():
@@ -1523,8 +1705,9 @@ class Gen_DT_EmpTaxCalcAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxCalcSerializer()}, tags=['Gen_DT_EmpTaxCalc'],
-        operation_id='Gen_DT_EmpTaxCalc_put')
+    @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxCalcSerializer()},
+                   tags=['Gen_DT_EmpTaxCalc'],
+                   operation_id='Gen_DT_EmpTaxCalc_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_EmpTaxCalc, pk=pk)
         serializer = Gen_DT_EmpTaxCalcSerializer(instance=instance, data=request.data, partial=True)
@@ -1533,8 +1716,9 @@ class Gen_DT_EmpTaxCalcAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxCalcSerializer()}, tags=['Gen_DT_EmpTaxCalc'],
-        operation_id='Gen_DT_EmpTaxCalc_delete')
+    @extend_schema(request=Gen_DT_EmpTaxCalcSerializer, responses={HTTP_200_OK: Gen_DT_EmpTaxCalcSerializer()},
+                   tags=['Gen_DT_EmpTaxCalc'],
+                   operation_id='Gen_DT_EmpTaxCalc_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_EmpTaxCalc, pk=pk)
         obj.delete()
@@ -1546,8 +1730,9 @@ class Gen_DT_PaymentBDHistoryAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_PaymentBDHistorySerializer, responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'],
-        operation_id='Gen_DT_PaymentBDHistory_get')
+    @extend_schema(request=Gen_DT_PaymentBDHistorySerializer,
+                   responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'],
+                   operation_id='Gen_DT_PaymentBDHistory_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_PaymentBDHistory, pk=pk)
@@ -1556,8 +1741,9 @@ class Gen_DT_PaymentBDHistoryAPIView(APIView):
         serializer = Gen_DT_PaymentBDHistorySerializer(Gen_DT_PaymentBDHistory.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_PaymentBDHistorySerializer, responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'],
-        operation_id='Gen_DT_PaymentBDHistory_post')
+    @extend_schema(request=Gen_DT_PaymentBDHistorySerializer,
+                   responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'],
+                   operation_id='Gen_DT_PaymentBDHistory_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_PaymentBDHistorySerializer(data=request.data)
         if serializer.is_valid():
@@ -1566,8 +1752,9 @@ class Gen_DT_PaymentBDHistoryAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_PaymentBDHistorySerializer, responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'],
-        operation_id='Gen_DT_PaymentBDHistory_put')
+    @extend_schema(request=Gen_DT_PaymentBDHistorySerializer,
+                   responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'],
+                   operation_id='Gen_DT_PaymentBDHistory_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_PaymentBDHistory, pk=pk)
         serializer = Gen_DT_PaymentBDHistorySerializer(instance=instance, data=request.data, partial=True)
@@ -1576,8 +1763,9 @@ class Gen_DT_PaymentBDHistoryAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_PaymentBDHistorySerializer, responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'],
-        operation_id='Gen_DT_PaymentBDHistory_delete')
+    @extend_schema(request=Gen_DT_PaymentBDHistorySerializer,
+                   responses={HTTP_200_OK: Gen_DT_PaymentBDHistorySerializer()}, tags=['Gen_DT_PaymentBDHistory'],
+                   operation_id='Gen_DT_PaymentBDHistory_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_PaymentBDHistory, pk=pk)
         obj.delete()
@@ -1589,8 +1777,9 @@ class Gen_DT_ProgressDocsAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_200_OK: Gen_DT_ProgressDocsSerializer()}, tags=['Gen_DT_ProgressDocs'],
-        operation_id='Gen_DT_ProgressDocs_get')
+    @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_200_OK: Gen_DT_ProgressDocsSerializer()},
+                   tags=['Gen_DT_ProgressDocs'],
+                   operation_id='Gen_DT_ProgressDocs_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_ProgressDocs, pk=pk)
@@ -1599,8 +1788,9 @@ class Gen_DT_ProgressDocsAPIView(APIView):
         serializer = Gen_DT_ProgressDocsSerializer(Gen_DT_ProgressDocs.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_201_CREATED: Gen_DT_ProgressDocsSerializer()}, tags=['Gen_DT_ProgressDocs'],
-        operation_id='Gen_DT_ProgressDocs_post')
+    @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_201_CREATED: Gen_DT_ProgressDocsSerializer()},
+                   tags=['Gen_DT_ProgressDocs'],
+                   operation_id='Gen_DT_ProgressDocs_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_ProgressDocsSerializer(data=request.data)
         if serializer.is_valid():
@@ -1609,8 +1799,9 @@ class Gen_DT_ProgressDocsAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_200_OK: Gen_DT_ProgressDocsSerializer()}, tags=['Gen_DT_ProgressDocs'],
-        operation_id='Gen_DT_ProgressDocs_put')
+    @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_200_OK: Gen_DT_ProgressDocsSerializer()},
+                   tags=['Gen_DT_ProgressDocs'],
+                   operation_id='Gen_DT_ProgressDocs_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_ProgressDocs, pk=pk)
         serializer = Gen_DT_ProgressDocsSerializer(instance=instance, data=request.data, partial=True)
@@ -1619,8 +1810,9 @@ class Gen_DT_ProgressDocsAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_200_OK: Gen_DT_ProgressDocsSerializer()}, tags=['Gen_DT_ProgressDocs'],
-        operation_id='Gen_DT_ProgressDocs_delete')
+    @extend_schema(request=Gen_DT_ProgressDocsSerializer, responses={HTTP_200_OK: Gen_DT_ProgressDocsSerializer()},
+                   tags=['Gen_DT_ProgressDocs'],
+                   operation_id='Gen_DT_ProgressDocs_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_ProgressDocs, pk=pk)
         obj.delete()
@@ -1632,8 +1824,9 @@ class Gen_DT_PaymentsAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_200_OK: Gen_DT_PaymentsSerializer()}, tags=['Gen_DT_Payments'],
-        operation_id='Gen_DT_Payments_get')
+    @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_200_OK: Gen_DT_PaymentsSerializer()},
+                   tags=['Gen_DT_Payments'],
+                   operation_id='Gen_DT_Payments_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_Payments, pk=pk)
@@ -1642,8 +1835,9 @@ class Gen_DT_PaymentsAPIView(APIView):
         serializer = Gen_DT_PaymentsSerializer(Gen_DT_Payments.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
-    @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_201_CREATED: Gen_DT_PaymentsSerializer()}, tags=['Gen_DT_Payments'],
-        operation_id='Gen_DT_Payments_post')
+    @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_201_CREATED: Gen_DT_PaymentsSerializer()},
+                   tags=['Gen_DT_Payments'],
+                   operation_id='Gen_DT_Payments_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_PaymentsSerializer(data=request.data)
         if serializer.is_valid():
@@ -1652,8 +1846,9 @@ class Gen_DT_PaymentsAPIView(APIView):
                             content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_200_OK: Gen_DT_PaymentsSerializer()}, tags=['Gen_DT_Payments'],
-        operation_id='Gen_DT_Payments_put')
+    @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_200_OK: Gen_DT_PaymentsSerializer()},
+                   tags=['Gen_DT_Payments'],
+                   operation_id='Gen_DT_Payments_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_Payments, pk=pk)
         serializer = Gen_DT_PaymentsSerializer(instance=instance, data=request.data, partial=True)
@@ -1662,8 +1857,9 @@ class Gen_DT_PaymentsAPIView(APIView):
             return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_200_OK: Gen_DT_PaymentsSerializer()}, tags=['Gen_DT_Payments'],
-        operation_id='Gen_DT_Payments_delete')
+    @extend_schema(request=Gen_DT_PaymentsSerializer, responses={HTTP_200_OK: Gen_DT_PaymentsSerializer()},
+                   tags=['Gen_DT_Payments'],
+                   operation_id='Gen_DT_Payments_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_Payments, pk=pk)
         obj.delete()
@@ -1676,7 +1872,7 @@ class DocAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(request=DocSerializer, responses={HTTP_200_OK: DocSerializer()}, tags=['Doc'],
-        operation_id='Doc_get')
+                   operation_id='Doc_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Doc, pk=pk)
@@ -1686,7 +1882,7 @@ class DocAPIView(APIView):
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
     @extend_schema(request=DocSerializer, responses={HTTP_201_CREATED: DocSerializer()}, tags=['Doc'],
-        operation_id='Doc_post')
+                   operation_id='Doc_post')
     def post(self, request, *args, **kwargs):
         serializer = DocSerializer(data=request.data)
         if serializer.is_valid():
@@ -1696,7 +1892,7 @@ class DocAPIView(APIView):
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     @extend_schema(request=DocSerializer, responses={HTTP_200_OK: DocSerializer()}, tags=['Doc'],
-        operation_id='Doc_put')
+                   operation_id='Doc_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Doc, pk=pk)
         serializer = DocSerializer(instance=instance, data=request.data, partial=True)
@@ -1707,7 +1903,7 @@ class DocAPIView(APIView):
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
     @extend_schema(request=DocSerializer, responses={HTTP_200_OK: DocSerializer()}, tags=['Doc'],
-        operation_id='Doc_delete')
+                   operation_id='Doc_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Doc, pk=pk)
         obj.delete()
@@ -1719,8 +1915,9 @@ class DocBulkUploadAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()}, tags=['DocBulkUpload'],
-        operation_id='DocBulkUpload_get')
+    @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()},
+                   tags=['DocBulkUpload'],
+                   operation_id='DocBulkUpload_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(DocBulkUpload, pk=pk)
@@ -1729,8 +1926,9 @@ class DocBulkUploadAPIView(APIView):
         serializer = DocBulkUploadSerializer(DocBulkUpload.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
-    @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()}, tags=['DocBulkUpload'],
-        operation_id='DocBulkUpload_post')
+    @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()},
+                   tags=['DocBulkUpload'],
+                   operation_id='DocBulkUpload_post')
     def post(self, request, *args, **kwargs):
         serializer = DocBulkUploadSerializer(data=request.data)
         if serializer.is_valid():
@@ -1739,8 +1937,9 @@ class DocBulkUploadAPIView(APIView):
                             content_type='multipart/form-data')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()}, tags=['DocBulkUpload'],
-        operation_id='DocBulkUpload_put')
+    @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()},
+                   tags=['DocBulkUpload'],
+                   operation_id='DocBulkUpload_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(DocBulkUpload, pk=pk)
         serializer = DocBulkUploadSerializer(instance=instance, data=request.data, partial=True)
@@ -1750,8 +1949,9 @@ class DocBulkUploadAPIView(APIView):
                             content_type='multipart/form-data')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()}, tags=['DocBulkUpload'],
-        operation_id='DocBulkUpload_delete')
+    @extend_schema(request=DocBulkUploadSerializer, responses={HTTP_200_OK: DocBulkUploadSerializer()},
+                   tags=['DocBulkUpload'],
+                   operation_id='DocBulkUpload_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(DocBulkUpload, pk=pk)
         obj.delete()
@@ -1764,7 +1964,7 @@ class EmployeeAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_200_OK: EmployeeSerializer()}, tags=['Employee'],
-        operation_id='Employee_get')
+                   operation_id='Employee_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Employee, pk=pk)
@@ -1774,7 +1974,7 @@ class EmployeeAPIView(APIView):
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_201_CREATED: EmployeeSerializer()}, tags=['Employee'],
-        operation_id='Employee_post')
+                   operation_id='Employee_post')
     def post(self, request, *args, **kwargs):
         serializer = EmployeeSerializer(data=request.data)
         if serializer.is_valid():
@@ -1784,7 +1984,7 @@ class EmployeeAPIView(APIView):
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='multipart/form-data')
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_200_OK: EmployeeSerializer()}, tags=['Employee'],
-        operation_id='Employee_put')
+                   operation_id='Employee_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Employee, pk=pk)
         serializer = EmployeeSerializer(instance=instance, data=request.data, partial=True)
@@ -1795,7 +1995,7 @@ class EmployeeAPIView(APIView):
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_200_OK: EmployeeSerializer()}, tags=['Employee'],
-        operation_id='Employee_delete')
+                   operation_id='Employee_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Employee, pk=pk)
         obj.delete()
@@ -1807,8 +2007,9 @@ class EmployeeBulkUploadAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_200_OK: EmployeeBulkUploadSerializer()}, tags=['EmployeeBulkUpload'],
-        operation_id='EmployeeBulkUpload_get')
+    @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_200_OK: EmployeeBulkUploadSerializer()},
+                   tags=['EmployeeBulkUpload'],
+                   operation_id='EmployeeBulkUpload_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(EmployeeBulkUpload, pk=pk)
@@ -1817,8 +2018,9 @@ class EmployeeBulkUploadAPIView(APIView):
         serializer = EmployeeBulkUploadSerializer(EmployeeBulkUpload.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
-    @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_201_CREATED: EmployeeBulkUploadSerializer()}, tags=['EmployeeBulkUpload'],
-        operation_id='EmployeeBulkUpload_post')
+    @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_201_CREATED: EmployeeBulkUploadSerializer()},
+                   tags=['EmployeeBulkUpload'],
+                   operation_id='EmployeeBulkUpload_post')
     def post(self, request, *args, **kwargs):
         serializer = EmployeeBulkUploadSerializer(data=request.data)
         if serializer.is_valid():
@@ -1827,8 +2029,9 @@ class EmployeeBulkUploadAPIView(APIView):
                             content_type='multipart/form-data')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_200_OK: EmployeeBulkUploadSerializer()}, tags=['EmployeeBulkUpload'],
-        operation_id='EmployeeBulkUpload_put')
+    @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_200_OK: EmployeeBulkUploadSerializer()},
+                   tags=['EmployeeBulkUpload'],
+                   operation_id='EmployeeBulkUpload_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(EmployeeBulkUpload, pk=pk)
         serializer = EmployeeBulkUploadSerializer(instance=instance, data=request.data, partial=True)
@@ -1838,8 +2041,9 @@ class EmployeeBulkUploadAPIView(APIView):
                             content_type='multipart/form-data')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_200_OK: EmployeeBulkUploadSerializer()}, tags=['EmployeeBulkUpload'],
-        operation_id='EmployeeBulkUpload_delete')
+    @extend_schema(request=EmployeeBulkUploadSerializer, responses={HTTP_200_OK: EmployeeBulkUploadSerializer()},
+                   tags=['EmployeeBulkUpload'],
+                   operation_id='EmployeeBulkUpload_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(EmployeeBulkUpload, pk=pk)
         obj.delete()
@@ -1851,18 +2055,22 @@ class Gen_DT_PatentPricesDetailsAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer, responses={HTTP_200_OK: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'],
-        operation_id='Gen_DT_PatentPricesDetails_get')
+    @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer,
+                   responses={HTTP_200_OK: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'],
+                   operation_id='Gen_DT_PatentPricesDetails_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_PatentPricesDetails, pk=pk)
             serializer = Gen_DT_PatentPricesDetailsSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = Gen_DT_PatentPricesDetailsSerializer(Gen_DT_PatentPricesDetails.objects.all().order_by('id'), many=True)
+        serializer = Gen_DT_PatentPricesDetailsSerializer(Gen_DT_PatentPricesDetails.objects.all().order_by('id'),
+                                                          many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
-    @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer, responses={HTTP_201_CREATED: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'],
-        operation_id='Gen_DT_PatentPricesDetails_post')
+    @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer,
+                   responses={HTTP_201_CREATED: Gen_DT_PatentPricesDetailsSerializer()},
+                   tags=['Gen_DT_PatentPricesDetails'],
+                   operation_id='Gen_DT_PatentPricesDetails_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_PatentPricesDetailsSerializer(data=request.data)
         if serializer.is_valid():
@@ -1871,8 +2079,9 @@ class Gen_DT_PatentPricesDetailsAPIView(APIView):
                             content_type='multipart/form-data')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer, responses={HTTP_200_OK: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'],
-        operation_id='Gen_DT_PatentPricesDetails_put')
+    @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer,
+                   responses={HTTP_200_OK: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'],
+                   operation_id='Gen_DT_PatentPricesDetails_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_PatentPricesDetails, pk=pk)
         serializer = Gen_DT_PatentPricesDetailsSerializer(instance=instance, data=request.data, partial=True)
@@ -1882,8 +2091,9 @@ class Gen_DT_PatentPricesDetailsAPIView(APIView):
                             content_type='multipart/form-data')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer, responses={HTTP_200_OK: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'],
-        operation_id='Gen_DT_PatentPricesDetails_delete')
+    @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer,
+                   responses={HTTP_200_OK: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'],
+                   operation_id='Gen_DT_PatentPricesDetails_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_PatentPricesDetails, pk=pk)
         obj.delete()
@@ -1895,8 +2105,9 @@ class Gen_DT_ClientAPIView(APIView):
     renderer_classes = [JSONRenderer]
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()}, tags=['Gen_DT_Client'],
-        operation_id='Gen_DT_Client_get')
+    @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()},
+                   tags=['Gen_DT_Client'],
+                   operation_id='Gen_DT_Client_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_Client, pk=pk)
@@ -1905,8 +2116,9 @@ class Gen_DT_ClientAPIView(APIView):
         serializer = Gen_DT_ClientSerializer(Gen_DT_Client.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
 
-    @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_201_CREATED: Gen_DT_ClientSerializer()}, tags=['Gen_DT_Client'],
-        operation_id='Gen_DT_Client_post')
+    @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_201_CREATED: Gen_DT_ClientSerializer()},
+                   tags=['Gen_DT_Client'],
+                   operation_id='Gen_DT_Client_post')
     def post(self, request, *args, **kwargs):
         serializer = Gen_DT_ClientSerializer(data=request.data)
         if serializer.is_valid():
@@ -1915,8 +2127,9 @@ class Gen_DT_ClientAPIView(APIView):
                             content_type='multipart/form-data')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
-    @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()}, tags=['Gen_DT_Client'],
-        operation_id='Gen_DT_Client_put')
+    @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()},
+                   tags=['Gen_DT_Client'],
+                   operation_id='Gen_DT_Client_put')
     def put(self, request, pk, *args, **kwargs):
         instance = get_object_or_404(Gen_DT_Client, pk=pk)
         serializer = Gen_DT_ClientSerializer(instance=instance, data=request.data, partial=True)
@@ -1926,8 +2139,9 @@ class Gen_DT_ClientAPIView(APIView):
                             content_type='multipart/form-data')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
-    @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()}, tags=['Gen_DT_Client'],
-        operation_id='Gen_DT_Client_delete')
+    @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()},
+                   tags=['Gen_DT_Client'],
+                   operation_id='Gen_DT_Client_delete')
     def delete(self, request, pk):
         obj = get_object_or_404(Gen_DT_Client, pk=pk)
         obj.delete()

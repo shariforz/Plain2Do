@@ -31,12 +31,12 @@ SECRET_KEY = 'qwewqe'
 # SECURITY WARNING: don't run with debug turned on in production!
 # Render Deployment Code
 # DEBUG = 'RENDER' not in os.environ
-CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net", "http://shariforz-plain2do-970b.twc1.net",
-                        "http://91.210.170.174"]
-
-ALLOWED_HOSTS = ['https://shariforz-plain2do-970b.twc1.net', "http://shariforz-plain2do-970b.twc1.net",
-                 "shariforz-plain2do-970b.twc1.net"]
-# ALLOWED_HOSTS = ['*']
+# CSRF_TRUSTED_ORIGINS = ["https://shariforz-plain2do-970b.twc1.net", "http://shariforz-plain2do-970b.twc1.net",
+#                         "http://91.210.170.174"]
+CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:8000/']
+# ALLOWED_HOSTS = ['https://shariforz-plain2do-970b.twc1.net', "http://shariforz-plain2do-970b.twc1.net",
+#                  "shariforz-plain2do-970b.twc1.net"]
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -216,35 +216,35 @@ SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 SESSION_COOKIE_AGE = 10800
 
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "formatters": {
-        "verbose": {
-            "format": "{levelname} {asctime} {message}",
-            "style": "{",
-        },
-    },
-    "handlers": {
-        "file": {
-            "level": "INFO",
-            "class": "logging.handlers.TimedRotatingFileHandler",
-            "when": "W6",
-            "interval": 4,
-            "backupCount": 3,
-            "encoding": "utf8",
-            "filename": os.path.join(BASE_DIR, "debug.log"),
-            "formatter": "verbose",
-        },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["file"],
-            "level": "INFO",
-            "propagate": True,
-        },
-    },
-}
+# LOGGING = {
+#     "version": 1,
+#     "disable_existing_loggers": False,
+#     "formatters": {
+#         "verbose": {
+#             "format": "{levelname} {asctime} {message}",
+#             "style": "{",
+#         },
+#     },
+#     "handlers": {
+#         "file": {
+#             "level": "INFO",
+#             "class": "logging.handlers.TimedRotatingFileHandler",
+#             "when": "W6",
+#             "interval": 4,
+#             "backupCount": 3,
+#             "encoding": "utf8",
+#             "filename": os.path.join(BASE_DIR, "debug.log"),
+#             "formatter": "verbose",
+#         },
+#     },
+#     "loggers": {
+#         "django": {
+#             "handlers": ["file"],
+#             "level": "INFO",
+#             "propagate": True,
+#         },
+#     },
+# }
 
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
 
@@ -257,7 +257,9 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
-    )
+    ),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 2
 }
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Plain2do API',
@@ -269,7 +271,7 @@ SPECTACULAR_SETTINGS = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
-    "ROTATE_REFRESH_TOKENS": True,
+    "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": True,
     "UPDATE_LAST_LOGIN": False,
 
