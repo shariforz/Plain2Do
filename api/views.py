@@ -9,6 +9,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 import xlwt
+from django.db.models import Count
 from rest_framework.pagination import PageNumberPagination
 
 
@@ -199,7 +200,7 @@ class CitizenshipAPIView(APIView):
 
 class DocumentTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=DocumentTypeSerializer,  # Specify the serializer for the request
@@ -258,7 +259,7 @@ class DocumentTypeAPIView(APIView):
 
 class Gen_DT_DocumentTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_DocumentTypeSerializer,  # Specify the serializer for the request
@@ -317,7 +318,7 @@ class Gen_DT_DocumentTypeAPIView(APIView):
 
 class Gen_DT_CountryAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_CountrySerializer,  # Specify the serializer for the request
@@ -376,7 +377,7 @@ class Gen_DT_CountryAPIView(APIView):
 
 class Gen_DT_DisciplineAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_DisciplineSerializer,  # Specify the serializer for the request
@@ -435,7 +436,7 @@ class Gen_DT_DisciplineAPIView(APIView):
 
 class Gen_DT_EmpLevelAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_EmpLevelSerializer,  # Specify the serializer for the request
@@ -553,7 +554,7 @@ class Gen_DT_EmpClassAPIView(APIView):
 
 class Gen_DT_JobTitleAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_JobTitleSerializer,  # Specify the serializer for the request
@@ -612,7 +613,7 @@ class Gen_DT_JobTitleAPIView(APIView):
 
 class Gen_DT_CurrencyAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_CurrencySerializer,  # Specify the serializer for the request
@@ -789,7 +790,7 @@ class Gen_DT_CounterPartyAPIView(APIView):
 
 class Gen_DT_SubjectOfRFAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_SubjectOfRFSerializer,  # Specify the serializer for the request
@@ -1155,7 +1156,7 @@ class Gen_DT_BudgetDataAPIView(APIView):
 
     @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()},
                    tags=['Gen_DT_BudgetData'],
-                   operation_id='Gen_DT_BudgetData_get')
+                   operation_id='Gen_DT_BudgetData_get', methods=['GET'], filters=True)
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
             instance = get_object_or_404(Gen_DT_BudgetData, pk=pk)
@@ -1191,35 +1192,38 @@ class Gen_DT_BudgetDataAPIView(APIView):
             response = HttpResponse(content_type='application/ms-excel')
             response['Content-Disposition'] = 'attachment; filename="BudgetData.xls"'
             wb = xlwt.Workbook(encoding='utf-8')
-            ws = wb.add_sheet('BudgetData')
-            row_num = 0
-            font_style = xlwt.XFStyle()
-            font_style.font.bold = True
-            columns = ['BudgetVersion', 'Discipline', 'BudgetCode', 'PrimaveraCode', 'JotTitle', 'LegDocumentType',
-                       'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate', 'EmpQty', 'EmpNetSalary']
-            for col_num in range(len(columns)):
-                ws.write(row_num, col_num, columns[col_num], font_style)
-            # Sheet body, remaining rows
-            font_style = xlwt.XFStyle()
-            rows = Gen_DT_BudgetData.objects.filter(id__in=IDS).values_list('BudgetVersion', 'Discipline', 'BudgetCode',
-                                                               'PrimaveraCode', 'JotTitle', 'LegDocumentType',
-                                                               'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate',
-                                                               'EmpQty', 'EmpNetSalary')
-            for row in rows:
-                row_num += 1
-                for col_num in range(len(row)):
-                    ws.write(row_num, col_num, row[col_num], font_style)
+            for i in IDS:
+                name = Gen_DT_BudgetData.objects.get(id=i)
+                ws = wb.add_sheet(str(name.id))
+                row_num = 0
+                font_style = xlwt.XFStyle()
+                font_style.font.bold = True
+                columns = ['BudgetVersion', 'Discipline', 'BudgetCode', 'PrimaveraCode', 'JotTitle', 'LegDocumentType',
+                           'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate', 'EmpQty', 'EmpNetSalary']
+                for col_num in range(len(columns)):
+                    ws.write(row_num, col_num, columns[col_num], font_style)
+                # Sheet body, remaining rows
+                font_style = xlwt.XFStyle()
+                rows = Gen_DT_BudgetData.objects.filter(id=i).values_list('BudgetVersion', 'Discipline', 'BudgetCode',
+                                                                   'PrimaveraCode', 'JotTitle', 'LegDocumentType',
+                                                                   'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate',
+                                                                   'EmpQty', 'EmpNetSalary')
+                for row in rows:
+                    row_num += 1
+                    for col_num in range(len(row)):
+                        ws.write(row_num, col_num, row[col_num], font_style)
             wb.save(response)
             return response
         elif request.GET.get('limit') and request.GET.get('offset'):
             paginator = PageNumberPagination()
             paginator.page_size = request.GET.get('limit')
             paginator.page = request.GET.get('offset')
-            queryset = Gen_DT_BudgetData.objects.all().order_by('id')
+            queryset = Gen_DT_BudgetData.objects.all().order_by('-id')
             result_page = paginator.paginate_queryset(queryset, request)
             serializer = Gen_DT_BudgetDataSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)
-        serializer = Gen_DT_BudgetDataSerializer(Gen_DT_BudgetData.objects.all().order_by('id'), many=True)
+        # print(Gen_DT_BudgetData.objects.all())
+        serializer = Gen_DT_BudgetDataSerializer(Gen_DT_BudgetData.objects.all().order_by('-id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_201_CREATED: Gen_DT_BudgetDataSerializer()},
@@ -1251,6 +1255,55 @@ class Gen_DT_BudgetDataAPIView(APIView):
         obj = get_object_or_404(Gen_DT_BudgetData, pk=pk)
         obj.delete()
         serializer = Gen_DT_BudgetDataSerializer(obj)
+        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK)
+
+
+class Gen_DT_BudgetDetailsAPIView(APIView):
+    renderer_classes = [JSONRenderer]
+    # permission_classes = [IsAuthenticated]
+
+    @extend_schema(request=BudgetDetailsSerializer,
+                   responses={HTTP_200_OK: BudgetDetailsSerializer()}, tags=['Gen_DT_BudgetDetails'],
+                   operation_id='Gen_DT_BudgetDetails_get')
+    def get(self, request, pk=None, *args, **kwargs):
+        if pk:
+            instance = get_object_or_404(Gen_DT_BudgetDetails, pk=pk)
+            serializer = BudgetDetailsSerializer(instance=instance)
+            return Response({"Response": serializer.data}, status=HTTP_200_OK)
+        serializer = BudgetDetailsSerializer(Gen_DT_BudgetDetails.objects.all().order_by('id'),
+                                                        many=True)
+        return Response({"Response": serializer.data}, status=HTTP_200_OK)
+
+    @extend_schema(request=BudgetDetailsSerializer,
+                   responses={HTTP_201_CREATED: BudgetDetailsSerializer()},
+                   tags=['Gen_DT_BudgetDetails'],
+                   operation_id='BudgetDetails_post')
+    def post(self, request, *args, **kwargs):
+        serializer = BudgetDetailsSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
+                            content_type='application/json')
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+
+    @extend_schema(request=BudgetDetailsSerializer,
+                   responses={HTTP_200_OK: BudgetDetailsSerializer()}, tags=['Gen_DT_BudgetDetails'],
+                   operation_id='BudgetDetails_put')
+    def put(self, request, pk, *args, **kwargs):
+        instance = get_object_or_404(Gen_DT_BudgetDetails, pk=pk)
+        serializer = BudgetDetailsSerializer(instance=instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"Data is successfully edited": serializer.data}, status=HTTP_200_OK)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
+
+    @extend_schema(request=BudgetDetailsSerializer,
+                   responses={HTTP_200_OK: BudgetDetailsSerializer()}, tags=['Gen_DT_BudgetDetails'],
+                   operation_id='BudgetDetails_delete')
+    def delete(self, request, pk):
+        obj = get_object_or_404(Gen_DT_BudgetDetails, pk=pk)
+        obj.delete()
+        serializer = BudgetDetailsSerializer(obj)
         return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK)
 
 
@@ -1352,7 +1405,7 @@ class Gen_DT_ExpenseFrequencyAPIView(APIView):
 
 class Gen_DT_ExpenseTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()},
                    tags=['Gen_DT_ExpenseType'],
@@ -1971,7 +2024,7 @@ class EmployeeAPIView(APIView):
             serializer = EmployeeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
         serializer = EmployeeSerializer(Employee.objects.all().order_by('id'), many=True)
-        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='application/json')
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_201_CREATED: EmployeeSerializer()}, tags=['Employee'],
                    operation_id='Employee_post')
@@ -1981,7 +2034,7 @@ class EmployeeAPIView(APIView):
             serializer.save()
             return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
                             content_type='application/json')
-        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='multipart/form-data')
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST, content_type='application/json')
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_200_OK: EmployeeSerializer()}, tags=['Employee'],
                    operation_id='Employee_put')
@@ -2000,7 +2053,7 @@ class EmployeeAPIView(APIView):
         obj = get_object_or_404(Employee, pk=pk)
         obj.delete()
         serializer = EmployeeSerializer(obj)
-        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='application/json')
 
 
 class EmployeeBulkUploadAPIView(APIView):

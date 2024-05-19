@@ -2,7 +2,7 @@ from apps.corecode.models import *
 from apps.employees.models import *
 from apps.docs.models import *
 from rest_framework.serializers import ModelSerializer
-
+from rest_framework import serializers
 
 class SiteConfigSerializer(ModelSerializer):
     class Meta:
@@ -59,6 +59,9 @@ class Gen_DT_EmpClassSerializer(ModelSerializer):
 
 
 class Gen_DT_JobTitleSerializer(ModelSerializer):
+    EmpLevel = Gen_DT_EmpLevelSerializer(read_only=True)
+    EmpClass = Gen_DT_EmpClassSerializer(read_only=True)
+
     class Meta:
         model = Gen_DT_JobTitle
         fields = '__all__'
@@ -118,9 +121,33 @@ class Gen_DT_UoMSerializer(ModelSerializer):
         fields = '__all__'
 
 
+class UserSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', )
+
+
 class Gen_DT_BudgetDataSerializer(ModelSerializer):
+    Project = serializers.PrimaryKeyRelatedField(queryset=Gen_DT_Project.objects.all())
+    Author = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    Project_data = Gen_DT_ProjectSerializer(source='Project', read_only=True)
+    Author_data = UserSerializer(source='Author', read_only=True)
+
     class Meta:
         model = Gen_DT_BudgetData
+        fields = '__all__'
+        # fields = ('Project', 'Author')
+
+
+class BudgetDetailsSerializer(ModelSerializer):
+    Discipline = Gen_DT_DisciplineSerializer(read_only=True)
+    Currency = Gen_DT_CurrencySerializer(read_only=True)
+    UoM = Gen_DT_UoMSerializer(read_only=True)
+    LegDocumentType = Gen_DT_DocumentTypeSerializer(read_only=True)
+    JotTitle = Gen_DT_JobTitleSerializer(read_only=True)
+
+    class Meta:
+        model = Gen_DT_BudgetDetails
         fields = '__all__'
 
 
@@ -208,12 +235,6 @@ class Gen_DT_PatentPricesDetailsSerializer(ModelSerializer):
         fields = '__all__'
 
 
-# class UnitOfMeasureSerializer(ModelSerializer):
-#     class Meta:
-#         model = UnitOfMeasure
-#         fields = '__all__'
-
-
 class Gen_DT_ClientSerializer(ModelSerializer):
     class Meta:
         model = Gen_DT_Client
@@ -235,6 +256,7 @@ class DocBulkUploadSerializer(ModelSerializer):
 
 # serializers for employees models starts from here
 class EmployeeSerializer(ModelSerializer):
+
     class Meta:
         model = Employee
         fields = '__all__'

@@ -22,8 +22,8 @@ urlpatterns = [
     path('gendt-country/', Gen_DT_CountryAPIView.as_view(), name='gen_dt_country'),
     path('gendt/discipline/<int:pk>/', Gen_DT_DisciplineAPIView.as_view(), name='gen_dt_discipline_one'),
     path('gendt/discipline/', Gen_DT_DisciplineAPIView.as_view(), name='gen_dt_discipline'),
-    path('gendt/employee/<int:pk>/', Gen_DT_EmpLevelAPIView.as_view(), name='get_dt_employee_one'),
-    path('gendt/employee/', Gen_DT_EmpLevelAPIView.as_view(), name='get_dt_employee'),
+    path('gendt/emplevel/<int:pk>/', Gen_DT_EmpLevelAPIView.as_view(), name='get_dt_emplevel_one'),
+    path('gendt/emplevel/', Gen_DT_EmpLevelAPIView.as_view(), name='get_dt_emplevel'),
     path('gendt/emp-class/<int:pk>/', Gen_DT_EmpClassAPIView.as_view(), name='gen_dt_empclass_one'),
     path('gendt/emp-class/', Gen_DT_EmpClassAPIView.as_view(), name='gen_dt_empclass'),
     path('gendt/job-title/<int:pk>/', Gen_DT_JobTitleAPIView.as_view(), name='gen_dt_job_title_one'),
@@ -48,6 +48,9 @@ urlpatterns = [
     path('gendt/uom/', Gen_DT_UoMAPIView.as_view(), name='gen_dt_uom_rate'),
     path('gendt/budget-data/<int:pk>/', Gen_DT_BudgetDataAPIView.as_view(), name='gen_dt_budget_data_one'),
     path('gendt/budget-data/', Gen_DT_BudgetDataAPIView.as_view(), name='gen_dt_budget_data'),
+    path('gendt/budget-details/<int:pk>/', Gen_DT_BudgetDetailsAPIView.as_view(), name='gen_dt_budget_details_one'),
+    path('gendt/budget-details/', Gen_DT_BudgetDetailsAPIView.as_view(), name='gen_dt_budget_details'),
+
     path('gendt/budget-data-history/<int:pk>/', Gen_DT_BudgetDataHistoryAPIView.as_view(), name='gen_dt_budget_data_history_one'),
     path('gendt/budget-data-history/', Gen_DT_BudgetDataHistoryAPIView.as_view(), name='gen_dt_budget_data_history'),
     path('gendt/expence-frequency/<int:pk>/', Gen_DT_ExpenseFrequencyAPIView.as_view(), name='gen_dt_expense_frequency_one'),
@@ -87,6 +90,3 @@ urlpatterns = [
     path('client/<int:pk>/', Gen_DT_ClientAPIView.as_view(), name='client_one'),
     path('client/', Gen_DT_ClientAPIView.as_view(), name='client'),
 ]
-
-for i in [1, 2]:
-    s = 'hi'

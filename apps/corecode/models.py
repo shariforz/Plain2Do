@@ -1,6 +1,7 @@
 from django.urls import reverse
 from django.utils import timezone
 from django.db import models
+from django.contrib.auth.models import User
 
 
 # Create your models here.
@@ -317,8 +318,26 @@ class Gen_DT_UoM(models.Model):
 
 class Gen_DT_BudgetData(models.Model):
     """Gen_DT_BudgetData"""
+    Project = models.ForeignKey(Gen_DT_Project, on_delete=models.SET_NULL, null=True)
+    Author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    APPROVAL_STATUS = [
+            ('success', 'success'),
+            ('rejected', 'rejected'),
+        ]
+    VersionDate = models.DateField(default=timezone.now)
+    BudgetVersion = models.IntegerField(default=1)
+    Status = models.CharField(max_length=56, choices=APPROVAL_STATUS)
 
-    BudgetVersion = models.IntegerField()
+    class Meta:
+        # verbose_name =CountryEN "Наименование"
+        ordering = ["id"]
+
+    def __str__(self):
+        return self.Status
+
+
+class Gen_DT_BudgetDetails(models.Model):
+    Budget_ID = models.ForeignKey(Gen_DT_BudgetData, on_delete=models.SET_NULL, verbose_name='Budget ID', null=True)
     Discipline = models.ForeignKey(
         Gen_DT_Discipline, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Discipline")
 
@@ -345,10 +364,10 @@ class Gen_DT_BudgetData(models.Model):
 
     class Meta:
         # verbose_name =CountryEN "Наименование"
-        ordering = ["BudgetVersion"]
+        ordering = ["BudgetCode"]
 
     def __str__(self):
-        return self.BudgetVersion
+        return self.BudgetCode
 
 
 class Gen_DT_BudgetDataHistory(models.Model):
@@ -361,6 +380,8 @@ class Gen_DT_BudgetDataHistory(models.Model):
 
     ProjectID = models.ForeignKey(
         Gen_DT_Project, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Project ID")
+    Author = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Author", null=True)
+    # user
 
     class Meta:
         ordering = ["BudgetDate"]
