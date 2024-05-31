@@ -2,7 +2,7 @@ from django.urls import reverse
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
-
+from django.db.models import F, Sum, Q
 
 # Create your models here.
 
@@ -321,9 +321,9 @@ class Gen_DT_BudgetData(models.Model):
     Project = models.ForeignKey(Gen_DT_Project, on_delete=models.SET_NULL, null=True)
     Author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     APPROVAL_STATUS = [
-            ('success', 'success'),
-            ('rejected', 'rejected'),
-        ]
+        ('success', 'success'),
+        ('rejected', 'rejected'),
+    ]
     VersionDate = models.DateField(default=timezone.now)
     BudgetVersion = models.IntegerField(default=1)
     Status = models.CharField(max_length=56, choices=APPROVAL_STATUS)
@@ -335,7 +335,8 @@ class Gen_DT_BudgetData(models.Model):
     def __str__(self):
         return self.Status
 
-
+import math
+from api.currency import USD, EUR, TRY
 class Gen_DT_BudgetDetails(models.Model):
     Budget_ID = models.ForeignKey(Gen_DT_BudgetData, on_delete=models.SET_NULL, verbose_name='Budget ID', null=True)
     Discipline = models.ForeignKey(
@@ -365,9 +366,55 @@ class Gen_DT_BudgetDetails(models.Model):
     class Meta:
         # verbose_name =CountryEN "Наименование"
         ordering = ["BudgetCode"]
+        indexes = [
+            models.Index(fields=['Budget_ID']),
+        ]
 
     def __str__(self):
         return self.BudgetCode
+
+    def calculate_salary(self):
+        tax_percent = {"VKS": 13, "Visa": 43, "Local/ EEC": 43, 'RVP/ VNJ': 43, "Patent": 43}
+        month_diff = self.EndOfWorkDate.month - self.StartOfWorkDate.month
+        day_diff = self.EndOfWorkDate.day - self.StartOfWorkDate.day
+        day_difference = (self.EndOfWorkDate - self.StartOfWorkDate).days
+        year_difference = self.EndOfWorkDate.year - self.StartOfWorkDate.year
+        adjusted_month_diff = month_diff + (1 if day_diff > 0 else 0)
+        salary_per_day = self.EmpNetSalary / 30
+        salary = salary_per_day * day_difference * self.EmpQty
+        taxes = 0
+        if self.LegDocumentType.DocumentTypeEN == "Visa":
+            if day_difference <= 182:
+                taxes = 60 / 100 * salary
+            elif day_difference > 182:
+                remaining_days = day_difference - 182
+                taxes = salary_per_day * 182 * 0.6 + salary_per_day * remaining_days * 0.43
+        else:
+            taxes = (tax_percent[self.LegDocumentType.DocumentTypeEN]) / 100 * salary
+        expense_frequency = ["First Month", "Every Month", "Monthly", "Yearly", "Every 3 Year"]
+        legal_expenses = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN).values('ExpensePrice', 'ExpenseFrequency__ExpenseFrequencyEN')
+        FIRST_MONTH_TOTAL_RUB = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="RUB").values('ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
+        FIRST_MONTH_TOTAL_TRY = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="TRY").values('ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
+        FIRST_MONTH_TOTAL_EUR = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="EUR").values('ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
+        FIRST_MONTH_TOTAL = FIRST_MONTH_TOTAL_RUB['total'] + (1 if FIRST_MONTH_TOTAL_EUR['total'] is None else FIRST_MONTH_TOTAL_EUR['total']) * round(EUR, 2) + (1 if FIRST_MONTH_TOTAL_TRY['total'] is None else FIRST_MONTH_TOTAL_TRY['total']) * round(TRY, 2)
+
+        EVERY_MONTHS_TOTAL = Gen_DT_LegalExpences.objects.filter(Q(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN) & (Q(ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[1]) | Q(ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[2]))).values('ExpensePrice').aggregate(total=Sum('ExpensePrice'))
+        YEARLY_TOTAL = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[3]).values('ExpensePrice').aggregate(total=Sum('ExpensePrice'))
+        EVERY_3_YEAR_TOTAL = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[4]).values('ExpensePrice').aggregate(total=Sum('ExpensePrice'))
+        month_cost = yearly_cost = every_3_year_cost = 0
+        for i in legal_expenses:
+            if i['ExpenseFrequency__ExpenseFrequencyEN'] in [expense_frequency[1], expense_frequency[2]]:
+                month_cost = EVERY_MONTHS_TOTAL['total'] * adjusted_month_diff
+            elif i['ExpenseFrequency__ExpenseFrequencyEN'] == expense_frequency[3]:
+                yearly = year_difference + (1 if month_diff > 0 else 0)
+                yearly_cost = yearly * YEARLY_TOTAL['total']
+            elif i['ExpenseFrequency__ExpenseFrequencyEN'] == expense_frequency[4]:
+                every_3_year = 1 if day_difference > 0 and year_difference <= 3 else math.ceil(year_difference / 3)
+                every_3_year_cost = every_3_year * EVERY_3_YEAR_TOTAL['total']
+        TOTAL_LEGAL_EXPENSES = (month_cost + yearly_cost + every_3_year_cost + FIRST_MONTH_TOTAL) * self.EmpQty
+        print(yearly)
+        return {"days_diff": day_difference, "month_diff": adjusted_month_diff, 'year_diff': year_difference,
+                "salary": round(salary, 1), "taxes": round(taxes, 1), 'LegalExpenses': TOTAL_LEGAL_EXPENSES}
 
 
 class Gen_DT_BudgetDataHistory(models.Model):
@@ -381,6 +428,7 @@ class Gen_DT_BudgetDataHistory(models.Model):
     ProjectID = models.ForeignKey(
         Gen_DT_Project, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Project ID")
     Author = models.ForeignKey(User, on_delete=models.SET_NULL, verbose_name="Author", null=True)
+
     # user
 
     class Meta:
@@ -411,8 +459,8 @@ class Gen_DT_ExpenseType(models.Model):
     ExpenseTypeRU = models.CharField(max_length=200)
     ExpenseTypeTR = models.CharField(max_length=200)
 
-    ExpenseFrequency = models.ForeignKey(
-        Gen_DT_ExpenseFrequency, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Expense Frequency")
+    # ExpenseFrequency = models.ForeignKey(
+    #     Gen_DT_ExpenseFrequency, on_delete=models.SET_NULL, blank=True, null=True, verbose_name="Expense Frequency")
 
     class Meta:
         ordering = ["ExpenseTypeEN"]
@@ -445,11 +493,15 @@ class Gen_DT_LegalExpences(models.Model):
 
     EffectiveDate = models.DateField(blank=True)
 
+    ExpenseFrequency = models.ForeignKey(
+        Gen_DT_ExpenseFrequency, on_delete=models.SET_NULL, blank=True, null=True, verbose_name='Expense Frequency'
+    )
+
     class Meta:
         ordering = ["ProjectID"]
 
     def __str__(self):
-        return self.ProjectID
+        return str(self.ProjectID)
 
 
 class Gen_DT_EmpLegalStatus(models.Model):

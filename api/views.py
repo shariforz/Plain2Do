@@ -1,3 +1,5 @@
+import time
+
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from .serializers import *
@@ -7,10 +9,9 @@ from rest_framework.views import APIView
 from rest_framework.renderers import JSONRenderer
 from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 import xlwt
-from django.db.models import Count
 from rest_framework.pagination import PageNumberPagination
+from .calculation import Calculation
 
 
 class SiteConfigAPIView(APIView):
@@ -495,7 +496,7 @@ class Gen_DT_EmpLevelAPIView(APIView):
 
 class Gen_DT_EmpClassAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(
         request=Gen_DT_EmpClassSerializer,  # Specify the serializer for the request
@@ -1108,7 +1109,7 @@ class Gen_DT_VAT_RateAPIView(APIView):
 
 class Gen_DT_UoMAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_200_OK: Gen_DT_UoMSerializer()}, tags=['Gen_DT_UoM'],
                    operation_id='Gen_DT_UoM_get')
@@ -1214,15 +1215,17 @@ class Gen_DT_BudgetDataAPIView(APIView):
                         ws.write(row_num, col_num, row[col_num], font_style)
             wb.save(response)
             return response
-        elif request.GET.get('limit') and request.GET.get('offset'):
+        elif request.GET.get('limit') and request.GET.get('page'):
             paginator = PageNumberPagination()
             paginator.page_size = request.GET.get('limit')
-            paginator.page = request.GET.get('offset')
+            paginator.page = request.GET.get('page')
             queryset = Gen_DT_BudgetData.objects.all().order_by('-id')
             result_page = paginator.paginate_queryset(queryset, request)
             serializer = Gen_DT_BudgetDataSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)
-        # print(Gen_DT_BudgetData.objects.all())
+        elif request.GET.get('data') == 'True':
+            serializer = Gen_DT_ProjectSerializer(Gen_DT_Project.objects.all().order_by('pk'), many=True)
+            return Response({"Projects": serializer.data})
         serializer = Gen_DT_BudgetDataSerializer(Gen_DT_BudgetData.objects.all().order_by('-id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
@@ -1267,11 +1270,9 @@ class Gen_DT_BudgetDetailsAPIView(APIView):
                    operation_id='Gen_DT_BudgetDetails_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
-            instance = get_object_or_404(Gen_DT_BudgetDetails, pk=pk)
-            serializer = BudgetDetailsSerializer(instance=instance)
+            serializer = BudgetDetailsSerializer(Gen_DT_BudgetDetails.objects.filter(Budget_ID=pk).order_by('id'), many=True)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = BudgetDetailsSerializer(Gen_DT_BudgetDetails.objects.all().order_by('id'),
-                                                        many=True)
+        serializer = BudgetDetailsSerializer(Gen_DT_BudgetDetails.objects.all().order_by('id'), many=True)
         return Response({"Response": serializer.data}, status=HTTP_200_OK)
 
     @extend_schema(request=BudgetDetailsSerializer,
@@ -1358,7 +1359,7 @@ class Gen_DT_BudgetDataHistoryAPIView(APIView):
 
 class Gen_DT_ExpenseFrequencyAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ExpenseFrequencySerializer,
                    responses={HTTP_200_OK: Gen_DT_ExpenseFrequencySerializer()}, tags=['Gen_DT_ExpenseFrequency'],
@@ -1452,7 +1453,7 @@ class Gen_DT_ExpenseTypeAPIView(APIView):
 
 class Gen_DT_LegalExpencesAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()},
                    tags=['Gen_DT_LegalExpences'],
@@ -1499,7 +1500,7 @@ class Gen_DT_LegalExpencesAPIView(APIView):
 
 class Gen_DT_EmpLegalStatusAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()},
                    tags=['Gen_DT_EmpLegalStatus'],
@@ -2106,7 +2107,7 @@ class EmployeeBulkUploadAPIView(APIView):
 
 class Gen_DT_PatentPricesDetailsAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer,
                    responses={HTTP_200_OK: Gen_DT_PatentPricesDetailsSerializer()}, tags=['Gen_DT_PatentPricesDetails'],
@@ -2156,7 +2157,7 @@ class Gen_DT_PatentPricesDetailsAPIView(APIView):
 
 class Gen_DT_ClientAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()},
                    tags=['Gen_DT_Client'],
@@ -2167,7 +2168,7 @@ class Gen_DT_ClientAPIView(APIView):
             serializer = Gen_DT_ClientSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
         serializer = Gen_DT_ClientSerializer(Gen_DT_Client.objects.all().order_by('id'), many=True)
-        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='application/json')
 
     @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_201_CREATED: Gen_DT_ClientSerializer()},
                    tags=['Gen_DT_Client'],
@@ -2177,7 +2178,7 @@ class Gen_DT_ClientAPIView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({"Data is successfully saved": serializer.data}, status=HTTP_201_CREATED,
-                            content_type='multipart/form-data')
+                            content_type='application/json')
         return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
 
     @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()},
@@ -2199,4 +2200,4 @@ class Gen_DT_ClientAPIView(APIView):
         obj = get_object_or_404(Gen_DT_Client, pk=pk)
         obj.delete()
         serializer = Gen_DT_ClientSerializer(obj)
-        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='multipart/form-data')
+        return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='application/json')
