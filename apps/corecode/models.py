@@ -1,10 +1,10 @@
-from django.urls import reverse
 from django.utils import timezone
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models import F, Sum, Q
+import math
+from api.currency import USD, EUR, TRY
 
-# Create your models here.
 
 class SiteConfig(models.Model):
     """Site Configurations"""
@@ -335,8 +335,7 @@ class Gen_DT_BudgetData(models.Model):
     def __str__(self):
         return self.Status
 
-import math
-from api.currency import USD, EUR, TRY
+
 class Gen_DT_BudgetDetails(models.Model):
     Budget_ID = models.ForeignKey(Gen_DT_BudgetData, on_delete=models.SET_NULL, verbose_name='Budget ID', null=True)
     Discipline = models.ForeignKey(
@@ -392,15 +391,39 @@ class Gen_DT_BudgetDetails(models.Model):
         else:
             taxes = (tax_percent[self.LegDocumentType.DocumentTypeEN]) / 100 * salary
         expense_frequency = ["First Month", "Every Month", "Monthly", "Yearly", "Every 3 Year"]
-        legal_expenses = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN).values('ExpensePrice', 'ExpenseFrequency__ExpenseFrequencyEN')
-        FIRST_MONTH_TOTAL_RUB = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="RUB").values('ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
-        FIRST_MONTH_TOTAL_TRY = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="TRY").values('ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
-        FIRST_MONTH_TOTAL_EUR = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="EUR").values('ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
-        FIRST_MONTH_TOTAL = FIRST_MONTH_TOTAL_RUB['total'] + (1 if FIRST_MONTH_TOTAL_EUR['total'] is None else FIRST_MONTH_TOTAL_EUR['total']) * round(EUR, 2) + (1 if FIRST_MONTH_TOTAL_TRY['total'] is None else FIRST_MONTH_TOTAL_TRY['total']) * round(TRY, 2)
+        legal_expenses = Gen_DT_LegalExpences.objects.filter(
+            LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN).values('ExpensePrice',
+                                                                                        'ExpenseFrequency__ExpenseFrequencyEN')
+        FIRST_MONTH_TOTAL_RUB = Gen_DT_LegalExpences.objects.filter(
+            LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN,
+            ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="RUB").values(
+            'ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
+        FIRST_MONTH_TOTAL_TRY = Gen_DT_LegalExpences.objects.filter(
+            LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN,
+            ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="TRY").values(
+            'ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
+        FIRST_MONTH_TOTAL_EUR = Gen_DT_LegalExpences.objects.filter(
+            LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN,
+            ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[0], Currency__CurrencyCode="EUR").values(
+            'ExpensePrice', 'Currency__CurrencyCode').aggregate(total=Sum('ExpensePrice'))
+        FIRST_MONTH_TOTAL = FIRST_MONTH_TOTAL_RUB['total'] + (
+            1 if FIRST_MONTH_TOTAL_EUR['total'] is None else FIRST_MONTH_TOTAL_EUR['total']) * round(EUR, 2) + (
+                                1 if FIRST_MONTH_TOTAL_TRY['total'] is None else FIRST_MONTH_TOTAL_TRY[
+                                    'total']) * round(TRY, 2)
 
-        EVERY_MONTHS_TOTAL = Gen_DT_LegalExpences.objects.filter(Q(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN) & (Q(ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[1]) | Q(ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[2]))).values('ExpensePrice').aggregate(total=Sum('ExpensePrice'))
-        YEARLY_TOTAL = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[3]).values('ExpensePrice').aggregate(total=Sum('ExpensePrice'))
-        EVERY_3_YEAR_TOTAL = Gen_DT_LegalExpences.objects.filter(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN, ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[4]).values('ExpensePrice').aggregate(total=Sum('ExpensePrice'))
+        EVERY_MONTHS_TOTAL = Gen_DT_LegalExpences.objects.filter(
+            Q(LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN) & (
+                        Q(ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[1]) | Q(
+                    ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[2]))).values('ExpensePrice').aggregate(
+            total=Sum('ExpensePrice'))
+        YEARLY_TOTAL = Gen_DT_LegalExpences.objects.filter(
+            LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN,
+            ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[3]).values('ExpensePrice').aggregate(
+            total=Sum('ExpensePrice'))
+        EVERY_3_YEAR_TOTAL = Gen_DT_LegalExpences.objects.filter(
+            LegDocumentType__DocumentTypeEN=self.LegDocumentType.DocumentTypeEN,
+            ExpenseFrequency__ExpenseFrequencyEN=expense_frequency[4]).values('ExpensePrice').aggregate(
+            total=Sum('ExpensePrice'))
         month_cost = yearly_cost = every_3_year_cost = 0
         for i in legal_expenses:
             if i['ExpenseFrequency__ExpenseFrequencyEN'] in [expense_frequency[1], expense_frequency[2]]:
@@ -412,9 +435,8 @@ class Gen_DT_BudgetDetails(models.Model):
                 every_3_year = 1 if day_difference > 0 and year_difference <= 3 else math.ceil(year_difference / 3)
                 every_3_year_cost = every_3_year * EVERY_3_YEAR_TOTAL['total']
         TOTAL_LEGAL_EXPENSES = (month_cost + yearly_cost + every_3_year_cost + FIRST_MONTH_TOTAL) * self.EmpQty
-        print(yearly)
         return {"days_diff": day_difference, "month_diff": adjusted_month_diff, 'year_diff': year_difference,
-                "salary": round(salary, 1), "taxes": round(taxes, 1), 'LegalExpenses': TOTAL_LEGAL_EXPENSES}
+                "salary": round(salary, 1), "taxes": round(taxes, 1), 'LegalExpenses': round(TOTAL_LEGAL_EXPENSES, 2)}
 
 
 class Gen_DT_BudgetDataHistory(models.Model):

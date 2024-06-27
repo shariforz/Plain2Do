@@ -89,4 +89,5 @@ urlpatterns = [
     path('patent-prices-details/', Gen_DT_PatentPricesDetailsAPIView.as_view(), name='patent_prices_details'),
     path('client/<int:pk>/', Gen_DT_ClientAPIView.as_view(), name='client_one'),
     path('client/', Gen_DT_ClientAPIView.as_view(), name='client'),
+    path("gantt-chart/", GanttChartApiView.as_view(), name='gantt-chart')
 ]

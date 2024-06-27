@@ -1,5 +1,3 @@
-import time
-
 from django.http import HttpResponse
 from django.shortcuts import render, get_object_or_404
 from .serializers import *
@@ -11,7 +9,9 @@ from drf_spectacular.utils import extend_schema
 from rest_framework.permissions import IsAuthenticated
 import xlwt
 from rest_framework.pagination import PageNumberPagination
-from .calculation import Calculation
+# from .calculation import calculate_salary
+from .calculation import salary_calculation
+from django.db.models import OuterRef, Subquery, QuerySet
 
 
 class SiteConfigAPIView(APIView):
@@ -87,7 +87,8 @@ class PermitDocCategoryAPIView(APIView):
         request=PermitDocCategorySerializer,  # Specify the serializer for the request
         responses={HTTP_200_OK: PermitDocCategorySerializer()},
         tags=['PermitDocCategory'],
-        operation_id='PermitDocCat_get'
+        operation_id='PermitDocCat_get',
+        methods=['GET', 'POST']
     )
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
@@ -201,6 +202,7 @@ class CitizenshipAPIView(APIView):
 
 class DocumentTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -260,6 +262,7 @@ class DocumentTypeAPIView(APIView):
 
 class Gen_DT_DocumentTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -319,6 +322,7 @@ class Gen_DT_DocumentTypeAPIView(APIView):
 
 class Gen_DT_CountryAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -378,6 +382,7 @@ class Gen_DT_CountryAPIView(APIView):
 
 class Gen_DT_DisciplineAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -437,6 +442,7 @@ class Gen_DT_DisciplineAPIView(APIView):
 
 class Gen_DT_EmpLevelAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -496,6 +502,7 @@ class Gen_DT_EmpLevelAPIView(APIView):
 
 class Gen_DT_EmpClassAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -555,6 +562,7 @@ class Gen_DT_EmpClassAPIView(APIView):
 
 class Gen_DT_JobTitleAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -614,6 +622,7 @@ class Gen_DT_JobTitleAPIView(APIView):
 
 class Gen_DT_CurrencyAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -791,6 +800,7 @@ class Gen_DT_CounterPartyAPIView(APIView):
 
 class Gen_DT_SubjectOfRFAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(
@@ -1109,6 +1119,7 @@ class Gen_DT_VAT_RateAPIView(APIView):
 
 class Gen_DT_UoMAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_UoMSerializer, responses={HTTP_200_OK: Gen_DT_UoMSerializer()}, tags=['Gen_DT_UoM'],
@@ -1153,6 +1164,7 @@ class Gen_DT_UoMAPIView(APIView):
 
 class Gen_DT_BudgetDataAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_BudgetDataSerializer, responses={HTTP_200_OK: Gen_DT_BudgetDataSerializer()},
@@ -1206,9 +1218,11 @@ class Gen_DT_BudgetDataAPIView(APIView):
                 # Sheet body, remaining rows
                 font_style = xlwt.XFStyle()
                 rows = Gen_DT_BudgetData.objects.filter(id=i).values_list('BudgetVersion', 'Discipline', 'BudgetCode',
-                                                                   'PrimaveraCode', 'JotTitle', 'LegDocumentType',
-                                                                   'Currency', 'UoM', 'StartOfWorkDate', 'EndOfWorkDate',
-                                                                   'EmpQty', 'EmpNetSalary')
+                                                                          'PrimaveraCode', 'JotTitle',
+                                                                          'LegDocumentType',
+                                                                          'Currency', 'UoM', 'StartOfWorkDate',
+                                                                          'EndOfWorkDate',
+                                                                          'EmpQty', 'EmpNetSalary')
                 for row in rows:
                     row_num += 1
                     for col_num in range(len(row)):
@@ -1219,7 +1233,16 @@ class Gen_DT_BudgetDataAPIView(APIView):
             paginator = PageNumberPagination()
             paginator.page_size = request.GET.get('limit')
             paginator.page = request.GET.get('page')
-            queryset = Gen_DT_BudgetData.objects.all().order_by('-id')
+            last_budget_subquery = Gen_DT_BudgetData.objects.filter(Project=OuterRef('Project')).order_by('-id').values('id')[:1]
+            queryset = QuerySet[Gen_DT_BudgetData]
+            if request.GET.get('latest') == 'True':
+                queryset = Gen_DT_BudgetData.objects.filter(
+                    id__in=Subquery(last_budget_subquery)
+                )
+            elif request.GET.get('archived') == 'True':
+                queryset = Gen_DT_BudgetData.objects.exclude(id__in=Subquery(last_budget_subquery))
+            elif request.GET.get("all") == 'True':
+                queryset = Gen_DT_BudgetData.objects.all()
             result_page = paginator.paginate_queryset(queryset, request)
             serializer = Gen_DT_BudgetDataSerializer(result_page, many=True)
             return paginator.get_paginated_response(serializer.data)
@@ -1270,10 +1293,23 @@ class Gen_DT_BudgetDetailsAPIView(APIView):
                    operation_id='Gen_DT_BudgetDetails_get')
     def get(self, request, pk=None, *args, **kwargs):
         if pk:
-            serializer = BudgetDetailsSerializer(Gen_DT_BudgetDetails.objects.filter(Budget_ID=pk).order_by('id'), many=True)
+            # serializer = BudgetDetailsSerializer(Gen_DT_BudgetDetails.objects.filter(Budget_ID=pk).order_by('id'),
+            #                                      many=True)
+            serializer = BudgetDetailsSerializer(salary_calculation(pk), many=True)
+            # print(salary_calculation(pk))
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
+        total = 0
+        for budget_detail in Gen_DT_BudgetDetails.objects.all():
+            result = budget_detail.calculate_salary()
+            total += result["salary"] + result["taxes"] + result["LegalExpenses"]
         serializer = BudgetDetailsSerializer(Gen_DT_BudgetDetails.objects.all().order_by('id'), many=True)
-        return Response({"Response": serializer.data}, status=HTTP_200_OK)
+        discipline = Gen_DT_DisciplineSerializer(Gen_DT_Discipline.objects.all(), many=True).data
+        JobTitle = Gen_DT_JobTitleSerializer(Gen_DT_JobTitle.objects.all(), many=True).data
+        currency = Gen_DT_CurrencySerializer(Gen_DT_Currency.objects.all(), many=True).data
+        UoM = Gen_DT_UoMSerializer(Gen_DT_UoM.objects.all(), many=True).data
+        return Response({"Response": serializer.data,
+                         "Selection": {"Discipline": discipline, "JobTitle": JobTitle, "Currency": currency,
+                                       'UoM': UoM}}, status=HTTP_200_OK)
 
     @extend_schema(request=BudgetDetailsSerializer,
                    responses={HTTP_201_CREATED: BudgetDetailsSerializer()},
@@ -1359,6 +1395,7 @@ class Gen_DT_BudgetDataHistoryAPIView(APIView):
 
 class Gen_DT_ExpenseFrequencyAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ExpenseFrequencySerializer,
@@ -1406,6 +1443,7 @@ class Gen_DT_ExpenseFrequencyAPIView(APIView):
 
 class Gen_DT_ExpenseTypeAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ExpenseTypeSerializer, responses={HTTP_200_OK: Gen_DT_ExpenseTypeSerializer()},
@@ -1453,6 +1491,7 @@ class Gen_DT_ExpenseTypeAPIView(APIView):
 
 class Gen_DT_LegalExpencesAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_LegalExpencesSerializer, responses={HTTP_200_OK: Gen_DT_LegalExpencesSerializer()},
@@ -1500,6 +1539,7 @@ class Gen_DT_LegalExpencesAPIView(APIView):
 
 class Gen_DT_EmpLegalStatusAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_EmpLegalStatusSerializer, responses={HTTP_200_OK: Gen_DT_EmpLegalStatusSerializer()},
@@ -2015,7 +2055,7 @@ class DocBulkUploadAPIView(APIView):
 
 class EmployeeAPIView(APIView):
     renderer_classes = [JSONRenderer]
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_200_OK: EmployeeSerializer()}, tags=['Employee'],
                    operation_id='Employee_get')
@@ -2024,8 +2064,66 @@ class EmployeeAPIView(APIView):
             instance = get_object_or_404(Employee, pk=pk)
             serializer = EmployeeSerializer(instance=instance)
             return Response({"Response": serializer.data}, status=HTTP_200_OK)
-        serializer = EmployeeSerializer(Employee.objects.all().order_by('id'), many=True)
-        return Response({"Response": serializer.data}, status=HTTP_200_OK, content_type='application/json')
+        elif request.GET.get('limit') and request.GET.get('page'):
+            paginator = PageNumberPagination()
+            paginator.page_size = request.GET.get('limit')
+            paginator.page = request.GET.get('page')
+            queryset = Employee.objects.all().order_by('-id')
+            result_page = paginator.paginate_queryset(queryset, request)
+            serializer = EmployeeSerializer(result_page, many=True)
+            return paginator.get_paginated_response(serializer.data)
+        elif request.GET.get('excel') == 'True':
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="Employee.xls"'
+            wb = xlwt.Workbook(encoding='utf-8')
+            ws = wb.add_sheet('Employee')
+            row_num = 0
+            font_style = xlwt.XFStyle()
+            font_style.font.bold = True
+            columns = ['current_status', 'personnel_number', 'surname', 'firstname', 'other_name', 'gender',
+                       'date_of_birth', 'position', 'citizenship', 'current_doc_category', 'date_of_employment', 'date_of_dismissal',
+                       'tin_number', 'snils_number', 'mobile_number', 'address', 'others']
+            for col_num in range(len(columns)):
+                ws.write(row_num, col_num, columns[col_num], font_style)
+            # Sheet body, remaining rows
+            font_style = xlwt.XFStyle()
+            rows = Employee.objects.all().values_list('current_status', 'personnel_number', 'surname', 'firstname', 'other_name', 'gender',
+                       'date_of_birth', 'position', 'citizenship', 'current_doc_category', 'date_of_employment', 'date_of_dismissal',
+                       'tin_number', 'snils_number', 'mobile_number', 'address', 'others')
+            for row in rows:
+                row_num += 1
+                for col_num in range(len(row)):
+                    ws.write(row_num, col_num, row[col_num], font_style)
+            wb.save(response)
+            return response
+        elif request.GET.get('excel'):
+            ids = request.GET.get('excel').split(',')
+            IDS = list(map(int, ids))
+            response = HttpResponse(content_type='application/ms-excel')
+            response['Content-Disposition'] = 'attachment; filename="Employee.xls"'
+            wb = xlwt.Workbook(encoding='utf-8')
+            for i in IDS:
+                name = Employee.objects.get(id=i)
+                ws = wb.add_sheet(str(name.id))
+                row_num = 0
+                font_style = xlwt.XFStyle()
+                font_style.font.bold = True
+                columns = ['current_status', 'personnel_number', 'surname', 'firstname', 'other_name', 'gender',
+                       'date_of_birth', 'position', 'citizenship', 'current_doc_category', 'date_of_employment', 'date_of_dismissal',
+                       'tin_number', 'snils_number', 'mobile_number', 'address', 'others']
+                for col_num in range(len(columns)):
+                    ws.write(row_num, col_num, columns[col_num], font_style)
+                # Sheet body, remaining rows
+                font_style = xlwt.XFStyle()
+                rows = Employee.objects.filter(id=i).values_list('current_status', 'personnel_number', 'surname', 'firstname', 'other_name', 'gender',
+                       'date_of_birth', 'position', 'citizenship', 'current_doc_category', 'date_of_employment', 'date_of_dismissal',
+                       'tin_number', 'snils_number', 'mobile_number', 'address', 'others')
+                for row in rows:
+                    row_num += 1
+                    for col_num in range(len(row)):
+                        ws.write(row_num, col_num, row[col_num], font_style)
+            wb.save(response)
+            return response
 
     @extend_schema(request=EmployeeSerializer, responses={HTTP_201_CREATED: EmployeeSerializer()}, tags=['Employee'],
                    operation_id='Employee_post')
@@ -2107,6 +2205,7 @@ class EmployeeBulkUploadAPIView(APIView):
 
 class Gen_DT_PatentPricesDetailsAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_PatentPricesDetailsSerializer,
@@ -2157,6 +2256,7 @@ class Gen_DT_PatentPricesDetailsAPIView(APIView):
 
 class Gen_DT_ClientAPIView(APIView):
     renderer_classes = [JSONRenderer]
+
     # permission_classes = [IsAuthenticated]
 
     @extend_schema(request=Gen_DT_ClientSerializer, responses={HTTP_200_OK: Gen_DT_ClientSerializer()},
@@ -2201,3 +2301,52 @@ class Gen_DT_ClientAPIView(APIView):
         obj.delete()
         serializer = Gen_DT_ClientSerializer(obj)
         return Response({"Data is deleted": serializer.data}, status=HTTP_200_OK, content_type='application/json')
+
+
+from django.db.models import Count
+
+
+class GanttChartApiView(APIView):
+    renderer_classes = [JSONRenderer]
+
+    # permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        projects = Gen_DT_Project.objects.all()
+        result = []
+        for project in projects:
+            budgets = Gen_DT_BudgetDetails.objects.filter(Budget_ID__Project=project.id).values(
+                'Discipline_id', 'Discipline__DisciplineEN', 'Discipline__DisciplineRU',
+                'Discipline__DisciplineTR').annotate(
+                Count('id'))
+            serialized_project = {
+                'ProjectNameEN': project.ProjectNameEN,
+                'ProjectNameRU': project.ProjectNameRU,
+                'ProjectNameTR': project.ProjectNameTR,
+                'Project_id': project.id,
+                'StartDate': project.StartDate,
+                'EndDate': project.EndDate,
+                'DayDifference': (project.EndDate - project.StartDate).days,
+                'Discipline': [
+                    {
+                        "DisciplineEN": budget['Discipline__DisciplineEN'],
+                        "DisciplineRU": budget['Discipline__DisciplineRU'],
+                        "DisciplineTR": budget['Discipline__DisciplineTR'],
+                        'JobTitle': [{
+                            "JobTitleEN": job_title.JotTitle.JobTitleEN,
+                            "JobTitleRU": job_title.JotTitle.JobTitleRU,
+                            "JobTitleTR": job_title.JotTitle.JobTitleTR,
+                            'StartOfWorkDate': job_title.StartOfWorkDate,
+                            "EndOfWorkDate": job_title.EndOfWorkDate,
+                            "DayDifference": (job_title.EndOfWorkDate - job_title.StartOfWorkDate).days
+                        }
+                            for job_title in Gen_DT_BudgetDetails.objects.filter(Budget_ID__Project=project.id,
+                                                                                 Discipline_id=budget['Discipline_id'])
+                        ],
+                    }
+                    for budget in budgets
+                ]
+            }
+            result.append(serialized_project)
+
+        return Response(result, status=HTTP_200_OK, content_type='application/json')

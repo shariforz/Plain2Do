@@ -1,4 +1,4 @@
-from api.calculation import Calculation
+# from api.calculation import Calculation
 from apps.corecode.models import *
 from apps.employees.models import *
 from apps.docs.models import *
@@ -45,7 +45,7 @@ class Gen_DT_CountrySerializer(ModelSerializer):
 class Gen_DT_DisciplineSerializer(ModelSerializer):
     class Meta:
         model = Gen_DT_Discipline
-        fields = '__all__'
+        fields = ('DisciplineEN', 'DisciplineRU', 'DisciplineTR')
 
 
 class Gen_DT_EmpLevelSerializer(ModelSerializer):
@@ -133,7 +133,7 @@ class Gen_DT_UoMSerializer(ModelSerializer):
 class UserSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ('username', )
+        fields = ('username',)
 
 
 class Gen_DT_BudgetDataSerializer(ModelSerializer):
@@ -148,7 +148,13 @@ class Gen_DT_BudgetDataSerializer(ModelSerializer):
         fields = '__all__'
 
     def get_total_cost(self, obj):
-        return 123
+        total = 0
+        for budget_detail in Gen_DT_BudgetDetails.objects.filter(Budget_ID_id=obj.id):
+            result = budget_detail.calculate_salary()
+
+            # Accumulate salary, taxes, and legal expenses
+            total += result["salary"] + result["taxes"] + result["LegalExpenses"]
+        return round(total, 2)
 
 
 class BudgetDetailsSerializer(ModelSerializer):
@@ -163,34 +169,34 @@ class BudgetDetailsSerializer(ModelSerializer):
     UoM_data = Gen_DT_UoMSerializer(read_only=True, source='UoM')
     LegDocumentType_data = Gen_DT_DocumentTypeSerializer(read_only=True, source='LegDocumentType')
     JotTitle_data = Gen_DT_JobTitleSerializer(read_only=True, source='JotTitle')
-    salary = serializers.SerializerMethodField()
-    day_difference = serializers.SerializerMethodField()
-    month_difference = serializers.SerializerMethodField()
-    year_difference = serializers.SerializerMethodField()
-    taxes = serializers.SerializerMethodField()
-    legal_expenses = serializers.SerializerMethodField()
+    # salary = serializers.SerializerMethodField()
+    # day_difference = serializers.SerializerMethodField()
+    # month_difference = serializers.SerializerMethodField()
+    # year_difference = serializers.SerializerMethodField()
+    # taxes = serializers.SerializerMethodField()
+    # legal_expenses = serializers.SerializerMethodField()
 
     class Meta:
         model = Gen_DT_BudgetDetails
         fields = '__all__'
 
-    def get_salary(self, obj):
-        return obj.calculate_salary()['salary']
-
-    def get_day_difference(self, obj):
-        return obj.calculate_salary()['days_diff']
-
-    def get_month_difference(self, obj):
-        return obj.calculate_salary()['month_diff']
-
-    def get_taxes(self, obj):
-        return obj.calculate_salary()['taxes']
-
-    def get_year_difference(self, obj):
-        return obj.calculate_salary()['year_diff']
-
-    def get_legal_expenses(self, obj):
-        return obj.calculate_salary()['LegalExpenses']
+    # def get_salary(self, obj):
+    #     return obj.calculate_salary()['salary']
+    #
+    # def get_day_difference(self, obj):
+    #     return obj.calculate_salary()['days_diff']
+    #
+    # def get_month_difference(self, obj):
+    #     return obj.calculate_salary()['month_diff']
+    #
+    # def get_taxes(self, obj):
+    #     return obj.calculate_salary()['taxes']
+    #
+    # def get_year_difference(self, obj):
+    #     return obj.calculate_salary()['year_diff']
+    #
+    # def get_legal_expenses(self, obj):
+    #     return obj.calculate_salary()['LegalExpenses']
 
 
 class Gen_DT_BudgetDataHistorySerializer(ModelSerializer):
@@ -217,7 +223,8 @@ class Gen_DT_LegalExpencesSerializer(ModelSerializer):
     ExpeneseCountry = serializers.PrimaryKeyRelatedField(queryset=Gen_DT_Country.objects.all(), write_only=True)
     Currency = serializers.PrimaryKeyRelatedField(queryset=Gen_DT_Currency.objects.all(), write_only=True)
     ExpenseType = serializers.PrimaryKeyRelatedField(queryset=Gen_DT_ExpenseType.objects.all(), write_only=True)
-    ExpenseFrequency = serializers.PrimaryKeyRelatedField(queryset=Gen_DT_ExpenseFrequency.objects.all(), write_only=True)
+    ExpenseFrequency = serializers.PrimaryKeyRelatedField(queryset=Gen_DT_ExpenseFrequency.objects.all(),
+                                                          write_only=True)
 
     ProjectID_data = Gen_DT_ProjectSerializer(read_only=True, source='ProjectID')
     LegDocumentType_data = Gen_DT_DocumentTypeSerializer(read_only=True, source='LegDocumentType')
@@ -312,7 +319,6 @@ class DocBulkUploadSerializer(ModelSerializer):
 
 # serializers for employees models starts from here
 class EmployeeSerializer(ModelSerializer):
-
     class Meta:
         model = Employee
         fields = '__all__'
@@ -322,3 +328,37 @@ class EmployeeBulkUploadSerializer(ModelSerializer):
     class Meta:
         model = EmployeeBulkUpload
         fields = '__all__'
+
+
+class GanttChartSerializer(ModelSerializer):
+    # ProjectName = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Gen_DT_BudgetDetails
+        fields = ('Discipline', 'JotTitle', 'StartOfWorkDate', 'EndOfWorkDate')
+        # fields = '__all__'
+        depth = 1
+    # def get_ProjectName(self, obj):
+    #     # Grouping the data by Budget_ID
+    #     grouped_data = Gen_DT_Project.objects.values('id', "ProjectNameEN", "ProjectNameRU", "ProjectNameTR", 'StartDate', 'EndDate').distinct()
+    #     print(grouped_data)
+    #
+    #     # Constructing the desired dictionary structure
+    #     result = []
+    #     for item in grouped_data:
+    #         print(">>>>>>>>>>>", item)
+    #         details = Gen_DT_BudgetDetails.objects.filter(Budget_ID=item['id']).values(
+    #             'Discipline__DisciplineEN', 'Discipline__DisciplineRU', 'Discipline__DisciplineTR',
+    #             'JotTitle__JobTitleEN', 'JotTitle__JobTitleRU', 'JotTitle__JobTitleTR', 'StartOfWorkDate', 'EndOfWorkDate'
+    #         )
+    #         result.append({
+    #             "Budget_ID": item['id'],
+    #             "ProjectNameEN": item['ProjectNameEN'],
+    #             "ProjectNameRU": item['ProjectNameRU'],
+    #             "ProjectNameTR": item['ProjectNameTR'],
+    #             "StartDate": item['StartDate'],
+    #             "EndDate": item['EndDate'],
+    #             "Details": list(details)
+    #         })
+    #     return result
+    #
